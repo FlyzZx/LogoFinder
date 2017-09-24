@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -120,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(requestCode == IMAGE_CAP && resultCode == Activity.RESULT_OK) {
             if(!this.tempPath.equals("")) {
                 this.image = BitmapFactory.decodeFile(this.tempPath);
+                this.image = findGoodImageOrientation();
                 this.imageView_main.setImageBitmap(image);
             }
         } else if (requestCode == GALLERY_CAP && resultCode == Activity.RESULT_OK) {
@@ -127,10 +130,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(data != null){
                 uri = data.getData();
             }
-            this.imageView_main.setImageURI(uri);
 
-            this.image = BitmapFactory.decodeFile(getRealPathFromURI(uri));
-
+            this.tempPath = getRealPathFromURI(uri);
+            this.image = BitmapFactory.decodeFile(this.tempPath);
+            this.image = findGoodImageOrientation();
+            //this.imageView_main.setImageURI(uri);
+            this.imageView_main.setImageBitmap(image);
         }
     }
 
@@ -140,4 +145,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         File file = new File(this.tempPath);
         file.delete();
     }
+
+    public Bitmap findGoodImageOrientation(){
+        ExifInterface ei = null;
+        try {
+            ei = new ExifInterface(this.tempPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,ExifInterface.ORIENTATION_UNDEFINED);
+
+        Bitmap retour = null;
+        switch(orientation){
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                retour = rotateImage(this.image, 90);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                retour = rotateImage(this.image, 180);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                retour = rotateImage(this.image, 270);
+                break;
+
+            case ExifInterface.ORIENTATION_NORMAL:
+            default:
+                retour = this.image;
+        }
+        return retour;
+
+    }
+
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
+
 }
+
+
