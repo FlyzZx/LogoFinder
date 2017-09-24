@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LogoFinder</string>
+    <string name="btn_takePic">Prendre une photo</string>
+    <string name="btn_choosePic">Choisir depuis la gallerie</string>
+    <string name="btn_analyze">Analyser</string>
+    <string name="imageView_main">Image principale</string>
+</resources>
