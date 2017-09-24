@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
+    private Button btn_analyze = null;
     private ImageView imageView_main = null;
 
     @Override
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Bouton récupération depuis gallerie
         this.btn_choosePic = (Button) findViewById(R.id.btn_choosePic);
         this.btn_choosePic.setOnClickListener(this);
+        //Bouton analyse de l'image
+        this.btn_analyze = (Button) findViewById(R.id.btn_analyze);
+        this.btn_analyze.setOnClickListener(this);
 
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
@@ -63,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_choosePic:
                 imageFromGallery();
+            case R.id.btn_analyze:
+                //TODO Appel fonction analyse
+                break;
             default:
                 break;
         }
