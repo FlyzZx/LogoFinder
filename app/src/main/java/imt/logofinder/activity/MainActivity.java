@@ -123,10 +123,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 this.imageView_main.setImageBitmap(image);
             }
         } else if (requestCode == GALLERY_CAP && resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
+            Uri uri =null;
+            if(data != null){
+                uri = data.getData();
+            }
+            this.imageView_main.setImageURI(uri);
 
             this.image = BitmapFactory.decodeFile(getRealPathFromURI(uri));
-            this.imageView_main.setImageBitmap(image);
+
         }
     }
 
