@@ -69,10 +69,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void imageFromGallery() {
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        startActivityForResult(Intent.createChooser(galleryIntent,
-                "Select Picture"), GALLERY_CAP);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        //galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent, GALLERY_CAP);
     }
 
     private File createImageTemp() throws IOException {
