@@ -18,6 +18,10 @@ public class SiftAnalyzer {
         }
     }
 
+    public void initialize() {
+
+    }
+
     public void analyze() {
 
     }
