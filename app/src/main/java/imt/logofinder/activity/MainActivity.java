@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -56,6 +57,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+            Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+
+            startActivity(secretDebug);
+        }
+        return true;
     }
 
     @Override
