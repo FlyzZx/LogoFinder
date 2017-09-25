@@ -2,6 +2,8 @@ package imt.logofinder.analyzer;
 
 import org.bytedeco.javacpp.opencv_core.*;
 
+import java.util.List;
+
 import static org.bytedeco.javacpp.opencv_imgcodecs.*;
 
 /**
@@ -9,21 +11,30 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.*;
  */
 
 public class SiftAnalyzer {
-    private Mat image_scn;
+    private Mat image_scn = null;
+    private List<Mat> refLogos = null;
 
     public SiftAnalyzer(String image_scn) throws Exception {
-        this.image_scn = imread(image_scn);
         if(image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
+
+        this.image_scn = imread(image_scn);
     }
 
+    /**
+     * Fonction d'initialisation des images de reférence vers des Mat OpenCV
+     */
     public void initialize() {
 
     }
 
-    public void analyze() {
+    /**
+     * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
+     */
+    public String analyze() {
 
+        return "";
     }
 }
 
