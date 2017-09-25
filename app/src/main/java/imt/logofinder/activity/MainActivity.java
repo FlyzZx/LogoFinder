@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
+import imt.logofinder.analyzer.SiftAnalyzer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -79,6 +80,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_choosePic:
                 imageFromGallery();
             case R.id.btn_analyze:
+                try {
+                    SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 //TODO Appel fonction analyse
                 break;
             default:

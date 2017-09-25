@@ -1,5 +1,8 @@
 package imt.logofinder.analyzer;
 
+import android.content.Context;
+import android.os.Environment;
+
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
@@ -7,7 +10,9 @@ import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacpp.opencv_features2d.BFMatcher;
 import org.bytedeco.javacpp.opencv_xfeatures2d;
 
+import java.io.File;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_calib3d.RANSAC;
@@ -26,6 +31,7 @@ import static org.bytedeco.javacpp.opencv_xfeatures2d.*;
 
 public class SiftAnalyzer {
 
+    private final String DB_PATH              = "/logodb/";
     private final int nFeatures               = 0;
     private final int nOctaveLayer            = 3;
     private final double contrastThreshold    = 0.04;
@@ -35,19 +41,31 @@ public class SiftAnalyzer {
     private Mat image_scn = null;
     private List<Mat> refLogos = null;
 
-    public SiftAnalyzer(String image_scn) throws Exception {
-        if(image_scn.isEmpty()) {
+    private Context context;
+
+    public SiftAnalyzer(Context context, String image_scn) throws Exception {
+       /* if(image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
 
-        this.image_scn = imread(image_scn);
+        this.image_scn = imread(image_scn);*/
+        this.context = context;
+        initialize();
     }
 
     /**
      * Fonction d'initialisation des images de reférence vers des Mat OpenCV
      */
     public void initialize() {
-
+        refLogos = new ArrayList<>();
+        File dir = Environment.getExternalStorageDirectory();
+        String dbPath = dir.getPath() + this.DB_PATH;
+        File dbDirectory = new File(dbPath);
+        File[] logos = dbDirectory.listFiles();
+        for(File f : logos) {
+            Mat tmp = imread(f.getPath());
+            refLogos.add(tmp);
+        }
     }
 
     /**
