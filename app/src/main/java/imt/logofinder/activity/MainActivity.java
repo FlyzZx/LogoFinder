@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_analyze:
                 try {
                     SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
+                    String outPath = siftAnalyzer.analyze();
+                    Bitmap bmp = BitmapFactory.decodeFile(outPath);
+                    this.imageView_main.setImageBitmap(bmp);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

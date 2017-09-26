@@ -11,6 +11,7 @@ import org.bytedeco.javacpp.opencv_features2d.BFMatcher;
 import org.bytedeco.javacpp.opencv_xfeatures2d;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +32,12 @@ import static org.bytedeco.javacpp.opencv_xfeatures2d.*;
 
 public class SiftAnalyzer {
 
-    private final String DB_PATH              = "/logodb/";
-    private final int nFeatures               = 0;
-    private final int nOctaveLayer            = 3;
-    private final double contrastThreshold    = 0.04;
-    private final double edgeThreshold        = 10.0;
-    private final double sigma                = 1.6;
+    private final String DB_PATH = "/logodb/";
+    private final int nFeatures = 0;
+    private final int nOctaveLayer = 3;
+    private final double contrastThreshold = 0.04;
+    private final double edgeThreshold = 10.0;
+    private final double sigma = 1.6;
 
     private Mat image_scn = null;
     private List<Mat> refLogos = null;
@@ -44,11 +45,11 @@ public class SiftAnalyzer {
     private Context context;
 
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
-       /* if(image_scn.isEmpty()) {
+        if (image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
 
-        this.image_scn = imread(image_scn);*/
+        this.image_scn = imread(image_scn);
         this.context = context;
         initialize();
     }
@@ -62,7 +63,7 @@ public class SiftAnalyzer {
         String dbPath = dir.getPath() + this.DB_PATH;
         File dbDirectory = new File(dbPath);
         File[] logos = dbDirectory.listFiles();
-        for(File f : logos) {
+        for (File f : logos) {
             Mat tmp = imread(f.getPath());
             refLogos.add(tmp);
         }
@@ -91,15 +92,15 @@ public class SiftAnalyzer {
             DMatch[] arrDm;
             int idxTab = 0, sizeTab = 0;
 
-            for(int i = 0; i < idx.rows(); i++) {
-                if(sizeTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
+            for (int i = 0; i < idx.rows(); i++) {
+                if (sizeTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
                     sizeTab++;
                 }
             }
             arrDm = new DMatch[sizeTab];
 
-            for(int i = 0; i < idx.rows(); i++) {
-                if(idxTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
+            for (int i = 0; i < idx.rows(); i++) {
+                if (idxTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
                     arrDm[idxTab] = matches.get(i);
                     idxTab++;
                 }
@@ -119,13 +120,13 @@ public class SiftAnalyzer {
             mask.resize(n);
             FloatBuffer pt1Idx = queryMat.createBuffer();
             FloatBuffer pt2Idx = trainMat.createBuffer();
-            for(int i = 0; i < n; i++) {
+            for (int i = 0; i < n; i++) {
                 Point2f p1 = keys_logo.get(goodMatchs.get(2 * i).trainIdx()).pt();
                 pt1Idx.put(2 * i, p1.x());
-                pt1Idx.put(2*i+1, p1.y());
+                pt1Idx.put(2 * i + 1, p1.y());
                 Point2f p2 = keys_img.get(goodMatchs.get(2 * i).queryIdx()).pt();
-                pt2Idx.put(2*i, p2.x());
-                pt2Idx.put(2*i+1, p2.y());
+                pt2Idx.put(2 * i, p2.x());
+                pt2Idx.put(2 * i + 1, p2.y());
             }
 
 
@@ -148,15 +149,26 @@ public class SiftAnalyzer {
             scn_corners.resize(4);
             perspectiveTransform(obj_corners, scn_corners, h);
 
-            /*Mat outM = new Mat();
-            drawMatches(image, keys_img, logo, keys_logo, goodMatchs, outM);
+            Mat outM = new Mat();
+            drawMatches(image_scn, keys_img, logo, keys_logo, goodMatchs, outM);
 
             idxF = scn_corners.createBuffer();
-            line(outM, new Point((int) idxF.get(0), (int) idxF.get(1)) , new Point((int) idxF.get(2), (int) idxF.get(3)), new Scalar(0), 7, 8, 0);
-            line(outM, new Point((int) idxF.get(3), (int) idxF.get(2)) , new Point((int) idxF.get(1), (int) idxF.get(0)), new Scalar(0), 7, 8, 0);
+            line(outM, new Point((int) idxF.get(0), (int) idxF.get(1)), new Point((int) idxF.get(2), (int) idxF.get(3)), new Scalar(0), 7, 8, 0);
+            line(outM, new Point((int) idxF.get(3), (int) idxF.get(2)), new Point((int) idxF.get(1), (int) idxF.get(0)), new Scalar(0), 7, 8, 0);
 
-            line(outM, new Point((int) idxF.get(0), (int) idxF.get(1)) , new Point((int) idxF.get(1), (int) idxF.get(0)), new Scalar(0), 7, 8, 0);
-            line(outM, new Point((int) idxF.get(2), (int) idxF.get(3)) , new Point((int) idxF.get(3), (int) idxF.get(2)), new Scalar(0), 7, 8, 0);*/
+            line(outM, new Point((int) idxF.get(0), (int) idxF.get(1)), new Point((int) idxF.get(1), (int) idxF.get(0)), new Scalar(0), 7, 8, 0);
+            line(outM, new Point((int) idxF.get(2), (int) idxF.get(3)), new Point((int) idxF.get(3), (int) idxF.get(2)), new Scalar(0), 7, 8, 0);
+
+            File tmpMatch = new File(Environment.getExternalStorageDirectory() + "/out.jpg");
+            try {
+                if (tmpMatch.createNewFile()) {
+                    imwrite(tmpMatch.getPath(), outM);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return tmpMatch.getPath();
+
         }
         return "";
     }
