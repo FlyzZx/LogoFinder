@@ -24,6 +24,7 @@ import static org.bytedeco.javacpp.opencv_core.perspectiveTransform;
 import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
 import static org.bytedeco.javacpp.opencv_imgcodecs.*;
 import static org.bytedeco.javacpp.opencv_imgproc.line;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_xfeatures2d.*;
 
 /**
@@ -50,6 +51,7 @@ public class SiftAnalyzer {
         }
 
         this.image_scn = imread(image_scn);
+        resize(this.image_scn, this.image_scn, new Size(400, 600));
         this.context = context;
         initialize();
     }
@@ -65,6 +67,7 @@ public class SiftAnalyzer {
         File[] logos = dbDirectory.listFiles();
         for (File f : logos) {
             Mat tmp = imread(f.getPath());
+            resize(tmp, tmp, new Size(400, 400));
             refLogos.add(tmp);
         }
     }

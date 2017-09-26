@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int GALLERY_CAP = 2;
 
     private String tempPath = "";
+    private String outPath = "";
     private Bitmap image;
 
     private Button btn_takePic = null;
@@ -63,9 +64,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
-            Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+            try {
+                SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
+                String outPath = siftAnalyzer.analyze();
+                this.outPath = outPath;
+                Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+                secretDebug.putExtra("imgPath", outPath);
+                startActivity(secretDebug);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            startActivity(secretDebug);
         }
         return true;
     }
@@ -80,14 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_choosePic:
                 imageFromGallery();
             case R.id.btn_analyze:
-                try {
-                    SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                    String outPath = siftAnalyzer.analyze();
-                    Bitmap bmp = BitmapFactory.decodeFile(outPath);
-                    this.imageView_main.setImageBitmap(bmp);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
                 //TODO Appel fonction analyse
                 break;
             default:
@@ -162,6 +164,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         File file = new File(this.tempPath);
+        if(this.outPath != "") {
+            File f = new File(Environment.getExternalStorageDirectory() + this.outPath);
+            f.delete();
+        }
         file.delete();
     }
 }
