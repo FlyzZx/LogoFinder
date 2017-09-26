@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         File file = new File(this.tempPath);
-        if(this.outPath != "") {
+        if(!this.outPath.equals("")) {
             File f = new File(Environment.getExternalStorageDirectory() + this.outPath);
             f.delete();
         }
