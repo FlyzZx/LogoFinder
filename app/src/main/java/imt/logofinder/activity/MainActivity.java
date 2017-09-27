@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
+import imt.logofinder.analyzer.SiftAnalyzer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -29,10 +31,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int GALLERY_CAP = 2;
 
     private String tempPath = "";
+    private String outPath = "";
     private Bitmap image;
 
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
+    private Button btn_analyze = null;
     private ImageView imageView_main = null;
 
     @Override
@@ -50,10 +54,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Bouton récupération depuis gallerie
         this.btn_choosePic = (Button) findViewById(R.id.btn_choosePic);
         this.btn_choosePic.setOnClickListener(this);
+        //Bouton analyse de l'image
+        this.btn_analyze = (Button) findViewById(R.id.btn_analyze);
+        this.btn_analyze.setOnClickListener(this);
 
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+            try {
+                SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
+                String outPath = siftAnalyzer.analyze();
+                this.outPath = outPath;
+                Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+                secretDebug.putExtra("imgPath", outPath);
+                startActivity(secretDebug);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return true;
     }
 
     @Override
@@ -65,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_choosePic:
                 imageFromGallery();
+            case R.id.btn_analyze:
+
+                //TODO Appel fonction analyse
+                break;
             default:
                 break;
         }
@@ -143,6 +172,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         File file = new File(this.tempPath);
+        if(!this.outPath.equals("")) {
+            File f = new File(Environment.getExternalStorageDirectory() + this.outPath);
+            f.delete();
+        }
         file.delete();
     }
 
