@@ -86,9 +86,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = view.getId();
         switch (id) {
             case R.id.btn_takePic:
+                eraseFileTemp();
                 takePic();
                 break;
             case R.id.btn_choosePic:
+                eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
 
