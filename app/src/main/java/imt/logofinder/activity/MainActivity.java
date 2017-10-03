@@ -168,15 +168,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        File file = new File(this.tempPath);
+    private void eraseFileTemp() {
+        if(!this.tempPath.equals("")) {
+            File file = new File(this.tempPath);
+            file.delete();
+        }
         if(!this.outPath.equals("")) {
-            File f = new File(Environment.getExternalStorageDirectory() + this.outPath);
+            File f = new File(this.outPath);
             f.delete();
         }
-        file.delete();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        eraseFileTemp();
     }
 
     public Bitmap findGoodImageOrientation(){
@@ -216,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
                 matrix, true);
     }
-
 }
 
 
