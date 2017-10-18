@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import imt.logofinder.activity.MainActivity;
 
@@ -43,7 +45,7 @@ public class SiftAnalyzer {
     private final double sigma = 1.6;
 
     private Mat image_scn = null;
-    private List<Mat> refLogos = null;
+    private Map<String, Integer> refLogos = null;
 
     private Context context;
 
@@ -62,15 +64,14 @@ public class SiftAnalyzer {
      * Fonction d'initialisation des images de reférence vers des Mat OpenCV
      */
     public void initialize() {
-        refLogos = new ArrayList<>();
+        refLogos = new HashMap<>();
+
         File dir = Environment.getExternalStorageDirectory();
         String dbPath = dir.getPath() + this.DB_PATH;
         File dbDirectory = new File(dbPath);
         File[] logos = dbDirectory.listFiles();
         for (File f : logos) {
-            Mat tmp = imread(f.getPath());
-            resize(tmp, tmp, new Size(400, 400));
-            refLogos.add(tmp);
+            refLogos.put(f.getAbsolutePath(), 0);
         }
     }
 
@@ -78,7 +79,10 @@ public class SiftAnalyzer {
      * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
      */
     public String analyze() {
-        for (Mat logo : refLogos) {
+        for (String logopath : refLogos.keySet()) {
+            Mat logo = imread(logopath);
+            resize(logo, logo, new Size(400, 400));
+
             SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
             KeyPointVector keys_img = new KeyPointVector();
             KeyPointVector keys_logo = new KeyPointVector();
@@ -166,7 +170,7 @@ public class SiftAnalyzer {
 
 
             File tmpMatch = new File(Environment.getExternalStorageDirectory() + "/out.jpg");
-            if(tmpMatch.exists()) { //On vérifie si il y a déjà un fichier de sortie, si oui on le supprime
+            if (tmpMatch.exists()) { //On vérifie si il y a déjà un fichier de sortie, si oui on le supprime
                 tmpMatch.delete();
             }
             try {
@@ -180,6 +184,7 @@ public class SiftAnalyzer {
             return tmpMatch.getPath();
 
         }
+
         return "";
     }
 }
