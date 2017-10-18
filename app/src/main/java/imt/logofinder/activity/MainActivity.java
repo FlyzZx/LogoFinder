@@ -13,13 +13,19 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
@@ -93,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
-
                 //TODO Appel fonction analyse
                 break;
             default:
@@ -108,10 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private File createImageTemp() throws IOException {
+        if(!this.tempPath.equals("")) { //On supprime l'image temporaire si il y en a déjà une existante
+            File toDel = new File(this.tempPath);
+            toDel.delete();
+        }
         String name = "tmp";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(name, ".jpg", storageDir);
-
         this.tempPath = image.getAbsolutePath();
         return image;
     }
@@ -161,12 +169,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(data != null){
                 uri = data.getData();
             }
+            try {
+                File imgTemp = createImageTemp();
+                copyFile(getRealPathFromURI(uri), imgTemp.getAbsolutePath());
+                this.tempPath = imgTemp.getAbsolutePath();
+                this.image = BitmapFactory.decodeFile(this.tempPath);
+                this.image = findGoodImageOrientation();
+                //this.imageView_main.setImageURI(uri);
+                this.imageView_main.setImageBitmap(image);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-            this.tempPath = getRealPathFromURI(uri);
-            this.image = BitmapFactory.decodeFile(this.tempPath);
-            this.image = findGoodImageOrientation();
-            //this.imageView_main.setImageURI(uri);
-            this.imageView_main.setImageBitmap(image);
         }
     }
 
@@ -179,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             File f = new File(this.outPath);
             f.delete();
         }
-
     }
 
     @Override
@@ -224,6 +237,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
                 matrix, true);
+    }
+
+    private void copyFile(String inputPath, String outputPath) {
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            File dir = new File (outputPath);
+            if (!dir.exists())
+            {
+                dir.mkdirs();
+            }
+
+
+            in = new FileInputStream(inputPath);
+            out = new FileOutputStream(outputPath);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+
+            out.flush();
+            out.close();
+            out = null;
+
+        }  catch (FileNotFoundException fnfe1) {
+            Log.e("tag", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+
     }
 }
 
