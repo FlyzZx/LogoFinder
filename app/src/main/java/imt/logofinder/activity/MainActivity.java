@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             try {
                 SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                String outPath = siftAnalyzer.analyze();
+                String outPath = siftAnalyzer.analyzeDebug();
                 this.outPath = outPath;
                 if (this.outPath.equals("")) {
                     Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
@@ -98,11 +98,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = view.getId();
         switch (id) {
             case R.id.btn_takePic:
-                eraseFileTemp();
+               // eraseFileTemp();
                 takePic();
                 break;
             case R.id.btn_choosePic:
-                eraseFileTemp();
+               // eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         super.onStop();
-        eraseFileTemp();
+       // eraseFileTemp();
     }
 
     public Bitmap findGoodImageOrientation() {
