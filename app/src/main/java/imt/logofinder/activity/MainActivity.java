@@ -114,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private File createImageTemp() throws IOException {
+        if(!this.tempPath.equals("")) { //On supprime l'image temporaire si il y en a déjà une existante
+            File toDel = new File(this.tempPath);
+            toDel.delete();
+        }
         String name = "tmp";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(name, ".jpg", storageDir);

@@ -16,6 +16,8 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import imt.logofinder.activity.MainActivity;
+
 import static org.bytedeco.javacpp.opencv_calib3d.RANSAC;
 import static org.bytedeco.javacpp.opencv_calib3d.findHomography;
 import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
@@ -162,7 +164,11 @@ public class SiftAnalyzer {
             line(outM, new Point((int) idxF.get(0), (int) idxF.get(1)), new Point((int) idxF.get(1), (int) idxF.get(0)), new Scalar(0), 7, 8, 0);
             line(outM, new Point((int) idxF.get(2), (int) idxF.get(3)), new Point((int) idxF.get(3), (int) idxF.get(2)), new Scalar(0), 7, 8, 0);
 
+
             File tmpMatch = new File(Environment.getExternalStorageDirectory() + "/out.jpg");
+            if(tmpMatch.exists()) { //On vérifie si il y a déjà un fichier de sortie, si oui on le supprime
+                tmpMatch.delete();
+            }
             try {
                 if (tmpMatch.createNewFile()) {
                     imwrite(tmpMatch.getPath(), outM);
