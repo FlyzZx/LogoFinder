@@ -18,6 +18,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,14 +72,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             try {
                 SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
                 String outPath = siftAnalyzer.analyze();
                 this.outPath = outPath;
-                Intent secretDebug = new Intent(this, SecretDebugActivity.class);
-                secretDebug.putExtra("imgPath", outPath);
-                startActivity(secretDebug);
+                if (this.outPath.equals("")) {
+                    Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+                    secretDebug.putExtra("imgPath", outPath);
+                    startActivity(secretDebug);
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,7 +105,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
-                //TODO Appel fonction analyse
+                try {
+                    SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
+                    String outPath = siftAnalyzer.analyze();
+                    this.outPath = outPath;
+                    if (this.outPath.equals("")) {
+                        Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
+                    } else {
+                        Intent secretDebug = new Intent(this, SecretDebugActivity.class);
+                        secretDebug.putExtra("imgPath", outPath);
+                        startActivity(secretDebug);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 break;
             default:
                 break;
@@ -113,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private File createImageTemp() throws IOException {
-        if(!this.tempPath.equals("")) { //On supprime l'image temporaire si il y en a déjà une existante
+        if (!this.tempPath.equals("")) { //On supprime l'image temporaire si il y en a déjà une existante
             File toDel = new File(this.tempPath);
             toDel.delete();
         }
@@ -133,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if(tmpFile != null) {
+            if (tmpFile != null) {
                 Uri tmpUri = FileProvider.getUriForFile(this, "imt.logofinder", tmpFile);
                 picIntent.putExtra(MediaStore.EXTRA_OUTPUT, tmpUri);
                 startActivityForResult(picIntent, IMAGE_CAP);
@@ -158,15 +179,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == IMAGE_CAP && resultCode == Activity.RESULT_OK) {
-            if(!this.tempPath.equals("")) {
+        if (requestCode == IMAGE_CAP && resultCode == Activity.RESULT_OK) {
+            if (!this.tempPath.equals("")) {
                 this.image = BitmapFactory.decodeFile(this.tempPath);
                 this.image = findGoodImageOrientation();
                 this.imageView_main.setImageBitmap(image);
             }
         } else if (requestCode == GALLERY_CAP && resultCode == Activity.RESULT_OK) {
-            Uri uri =null;
-            if(data != null){
+            Uri uri = null;
+            if (data != null) {
                 uri = data.getData();
             }
             try {
@@ -185,11 +206,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void eraseFileTemp() {
-        if(!this.tempPath.equals("")) {
+        if (!this.tempPath.equals("")) {
             File file = new File(this.tempPath);
             file.delete();
         }
-        if(!this.outPath.equals("")) {
+        if (!this.outPath.equals("")) {
             File f = new File(this.outPath);
             f.delete();
         }
@@ -201,17 +222,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         eraseFileTemp();
     }
 
-    public Bitmap findGoodImageOrientation(){
+    public Bitmap findGoodImageOrientation() {
         ExifInterface ei = null;
         try {
             ei = new ExifInterface(this.tempPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,ExifInterface.ORIENTATION_UNDEFINED);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
         Bitmap retour = null;
-        switch(orientation){
+        switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
                 retour = rotateImage(this.image, 90);
                 break;
@@ -244,9 +265,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         InputStream in = null;
         OutputStream out = null;
         try {
-            File dir = new File (outputPath);
-            if (!dir.exists())
-            {
+            File dir = new File(outputPath);
+            if (!dir.exists()) {
                 dir.mkdirs();
             }
 
@@ -266,10 +286,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             out.close();
             out = null;
 
-        }  catch (FileNotFoundException fnfe1) {
+        } catch (FileNotFoundException fnfe1) {
             Log.e("tag", fnfe1.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("tag", e.getMessage());
         }
 

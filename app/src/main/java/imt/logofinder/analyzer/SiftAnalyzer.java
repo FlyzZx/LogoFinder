@@ -36,13 +36,15 @@ import static org.bytedeco.javacpp.opencv_xfeatures2d.*;
  */
 
 public class SiftAnalyzer {
-
+    //Valeurs par défaut : (0,3,0.04,10.0,1.6)
     private final String DB_PATH = "/logodb/";
     private final int nFeatures = 0;
-    private final int nOctaveLayer = 3;
-    private final double contrastThreshold = 0.04;
-    private final double edgeThreshold = 10.0;
+    private final int nOctaveLayer = 4;
+    private final double contrastThreshold = 0.06;
+    private final double edgeThreshold = 11.0;
     private final double sigma = 1.6;
+    private final double matchRatio = 0.7;
+
 
     private Mat image_scn = null;
     private Map<String, Integer> refLogos = null;
@@ -79,6 +81,8 @@ public class SiftAnalyzer {
      * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
      */
     public String analyze() {
+        int nbMaxmatches = 0;
+        String retour ="";
         for (String logopath : refLogos.keySet()) {
             Mat logo = imread(logopath);
             resize(logo, logo, new Size(400, 400));
@@ -102,14 +106,14 @@ public class SiftAnalyzer {
             int idxTab = 0, sizeTab = 0;
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (sizeTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
+                if (sizeTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
                     sizeTab++;
                 }
             }
             arrDm = new DMatch[sizeTab];
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (idxTab < 25 && (matches.get(i).distance() < 0.75 * matches.get(i + 1).distance())) {
+                if (idxTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
                     arrDm[idxTab] = matches.get(i);
                     idxTab++;
                 }
@@ -137,9 +141,13 @@ public class SiftAnalyzer {
                 pt2Idx.put(2 * i, p2.x());
                 pt2Idx.put(2 * i + 1, p2.y());
             }
+            if(nbMaxmatches < (int)goodMatchs.size()){
+                nbMaxmatches = (int)goodMatchs.size();
+                retour = logopath;
+            }
 
 
-            h = findHomography(queryMat, trainMat, RANSAC, 5, mask, 2000, 0.1);
+            /*h = findHomography(queryMat, trainMat, RANSAC, 5, mask, 2000, 0.1);
 
             Mat obj_corners = new Mat(4, 1, CV_32FC2);
             obj_corners.resize(4);
@@ -179,12 +187,12 @@ public class SiftAnalyzer {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-            //TODO A modifier pour plusieurs images de référence
-            return tmpMatch.getPath();
+            }*/
+
+
 
         }
 
-        return "";
+        return retour;
     }
 }
