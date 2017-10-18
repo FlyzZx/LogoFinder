@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
-
                 //TODO Appel fonction analyse
                 break;
             default:
@@ -245,8 +244,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         InputStream in = null;
         OutputStream out = null;
         try {
-
-            //create output directory if it doesn't exist
             File dir = new File (outputPath);
             if (!dir.exists())
             {
@@ -265,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             in.close();
             in = null;
 
-            // write the output file (You have now copied the file)
             out.flush();
             out.close();
             out = null;

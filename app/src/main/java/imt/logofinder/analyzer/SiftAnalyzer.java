@@ -176,6 +176,7 @@ public class SiftAnalyzer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            //TODO A modifier pour plusieurs images de référence
             return tmpMatch.getPath();
 
         }
