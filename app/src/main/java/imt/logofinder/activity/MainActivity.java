@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             this.tempPath = getRealPathFromURI(uri);
             this.image = BitmapFactory.decodeFile(this.tempPath);
-            this.image = findGoodImageOrientation();
+            //this.image = findGoodImageOrientation();
             //this.imageView_main.setImageURI(uri);
             this.imageView_main.setImageBitmap(image);
         }
@@ -179,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             File f = new File(this.outPath);
             f.delete();
         }
-
     }
 
     @Override
