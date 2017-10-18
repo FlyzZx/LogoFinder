@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 copyFile(getRealPathFromURI(uri), imgTemp.getAbsolutePath());
                 this.tempPath = imgTemp.getAbsolutePath();
                 this.image = BitmapFactory.decodeFile(this.tempPath);
-                //this.image = findGoodImageOrientation();
+                this.image = findGoodImageOrientation();
                 //this.imageView_main.setImageURI(uri);
                 this.imageView_main.setImageBitmap(image);
             } catch (IOException e) {
