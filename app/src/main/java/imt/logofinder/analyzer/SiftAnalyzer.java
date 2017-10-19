@@ -40,14 +40,14 @@ public class SiftAnalyzer {
     private final String DB_PATH = "/logodb/";
     private final int nFeatures = 0;
     private final int nOctaveLayer = 3;
-    private final double contrastThreshold = 0.03;
-    private final double edgeThreshold = 11.0;
-    private final double sigma = 1.7;
+    private final double contrastThreshold = 0.04;
+    private final double edgeThreshold = 10.0;
+    private final double sigma = 1.6;
     private final double matchRatio = 0.8;
 
 
     private Mat image_scn = null;
-    private Map<String, Integer> refLogos = null;
+    private Map<String, Float> refLogos = null;
 
     private Context context;
 
@@ -73,7 +73,7 @@ public class SiftAnalyzer {
         File dbDirectory = new File(dbPath);
         File[] logos = dbDirectory.listFiles();
         for (File f : logos) {
-            refLogos.put(f.getAbsolutePath(), 0);
+            refLogos.put(f.getAbsolutePath(), 0f);
         }
     }
 
@@ -81,7 +81,7 @@ public class SiftAnalyzer {
      * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
      */
     public String analyze() {
-        int nbMaxmatches = 0;
+        float bMatch = 100000f; //Très grande distance
         String retour ="";
         for (String logopath : refLogos.keySet()) {
             Mat logo = imread(logopath);
@@ -105,51 +105,40 @@ public class SiftAnalyzer {
             DMatch[] arrDm;
             int idxTab = 0, sizeTab = 0;
 
-            for (int i = 0; i < idx.rows(); i++) {
-                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
+            for (int i = 0; i < idx.rows(); i++) { //On calcule la taille du tableau
+                if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
                     sizeTab++;
                 }
             }
             arrDm = new DMatch[sizeTab];
 
-            for (int i = 0; i < idx.rows(); i++) {
-                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
+            for (int i = 0; i < idx.rows(); i++) { //On rempli les bons matchs
+                if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
                     arrDm[idxTab] = matches.get(i);
                     idxTab++;
                 }
             }
             goodMatchs.put(arrDm);
 
-            int total = (int) keys_logo.size();
-            Mat queryMat = new Mat(total, 1, CV_32FC2);
-            Mat trainMat = new Mat(total, 1, CV_32FC2);
-            Mat mask = new Mat(total, 1, CV_32FC2);
-            Mat h = new Mat(3, 3, CV_64FC1);
+            float d = moyenneDistance(arrDm);
 
-            int n = (int) (goodMatchs.size() / 2);
-
-            queryMat.resize(n);
-            trainMat.resize(n);
-            mask.resize(n);
-            FloatBuffer pt1Idx = queryMat.createBuffer();
-            FloatBuffer pt2Idx = trainMat.createBuffer();
-            for (int i = 0; i < n; i++) {
-                Point2f p1 = keys_logo.get(goodMatchs.get(2 * i).trainIdx()).pt();
-                pt1Idx.put(2 * i, p1.x());
-                pt1Idx.put(2 * i + 1, p1.y());
-                Point2f p2 = keys_img.get(goodMatchs.get(2 * i).queryIdx()).pt();
-                pt2Idx.put(2 * i, p2.x());
-                pt2Idx.put(2 * i + 1, p2.y());
-            }
-            if(nbMaxmatches < (int)goodMatchs.size()){
-                nbMaxmatches = (int)goodMatchs.size();
+            if(bMatch > d){
+                bMatch = d;
                 retour = logopath;
             }
-            refLogos.put(logopath,(int)goodMatchs.size());
+            refLogos.put(logopath,d);
         }
-        if(nbMaxmatches <=5){
-            retour = "";//Pas de résultat
-        }
+
         return retour;
+    }
+
+
+    public float moyenneDistance(DMatch[] arrDm) {
+        float distance = 0;
+        for(int i = 0;i<arrDm.length;i++) {
+         distance+=  arrDm[i].distance();
+
+        }
+        return distance / arrDm.length;
     }
 }
