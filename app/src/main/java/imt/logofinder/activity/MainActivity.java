@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             try {
                 SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                String outPath = siftAnalyzer.analyzeDebug();
+                String outPath = siftAnalyzer.analyze();
                 this.outPath = outPath;
                 if (this.outPath.equals("")) {
                     Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
