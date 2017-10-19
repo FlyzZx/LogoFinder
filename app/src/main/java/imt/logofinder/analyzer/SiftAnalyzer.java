@@ -47,7 +47,7 @@ public class SiftAnalyzer {
 
 
     private Mat image_scn = null;
-    private Map<String, Float> refLogos = null;
+    private Map<String, Map<String, Float>> refLogos = null;
 
     private Context context;
 
@@ -71,9 +71,16 @@ public class SiftAnalyzer {
         File dir = Environment.getExternalStorageDirectory();
         String dbPath = dir.getPath() + this.DB_PATH;
         File dbDirectory = new File(dbPath);
+
         File[] logos = dbDirectory.listFiles();
         for (File f : logos) {
-            refLogos.put(f.getAbsolutePath(), 0f);
+            String name = f.getName();
+            Map<String, Float> logoData = new HashMap<>();
+            for (File lo : f.listFiles()) {
+                logoData.put(lo.getAbsolutePath(), 0f);
+            }
+            refLogos.put(name, logoData);
+            //refLogos.put(f.getAbsolutePath(), 0f);
         }
     }
 
@@ -82,61 +89,71 @@ public class SiftAnalyzer {
      */
     public String analyze() {
         float bMatch = 100000f; //Très grande distance
-        String retour ="";
-        for (String logopath : refLogos.keySet()) {
-            Mat logo = imread(logopath);
-            resize(logo, logo, new Size(400, 400));
+        String retour = "";
+        for (String classes : refLogos.keySet()) {
+            for (String logopath : refLogos.get(classes).keySet()) {
+                Mat logo = imread(logopath);
+                resize(logo, logo, new Size(400, 400));
 
-            SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
-            KeyPointVector keys_img = new KeyPointVector();
-            KeyPointVector keys_logo = new KeyPointVector();
-            Mat desc_img = new Mat();
-            Mat desc_logo = new Mat();
-            sift.detectAndCompute(image_scn, new Mat(), keys_img, desc_img);
-            sift.detectAndCompute(logo, new Mat(), keys_logo, desc_logo);
+                SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
+                KeyPointVector keys_img = new KeyPointVector();
+                KeyPointVector keys_logo = new KeyPointVector();
+                Mat desc_img = new Mat();
+                Mat desc_logo = new Mat();
+                sift.detectAndCompute(image_scn, new Mat(), keys_img, desc_img);
+                sift.detectAndCompute(logo, new Mat(), keys_logo, desc_logo);
 
-            BFMatcher matcher = new BFMatcher();
-            DMatchVector matches = new DMatchVector();
-            matcher.match(desc_img, desc_logo, matches);
-            //matcher.knnMatch(desc_img, desc_logo, matches, 2);
-            DMatchVector goodMatchs = new DMatchVector();
-            FloatRawIndexer idx = desc_img.createIndexer();
+                BFMatcher matcher = new BFMatcher();
+                DMatchVector matches = new DMatchVector();
+                matcher.match(desc_img, desc_logo, matches);
+                //matcher.knnMatch(desc_img, desc_logo, matches, 2);
+                DMatchVector goodMatchs = new DMatchVector();
+                FloatRawIndexer idx = desc_img.createIndexer();
 
-            DMatch[] arrDm;
-            int idxTab = 0, sizeTab = 0;
+                DMatch[] arrDm;
+                int idxTab = 0, sizeTab = 0;
 
-            for (int i = 0; i < idx.rows(); i++) { //On calcule la taille du tableau
-                if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                    sizeTab++;
+                for (int i = 0; i < idx.rows(); i++) { //On calcule la taille du tableau
+                    if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                        sizeTab++;
+                    }
                 }
-            }
-            arrDm = new DMatch[sizeTab];
+                arrDm = new DMatch[sizeTab];
 
-            for (int i = 0; i < idx.rows(); i++) { //On rempli les bons matchs
-                if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                    arrDm[idxTab] = matches.get(i);
-                    idxTab++;
+                for (int i = 0; i < idx.rows(); i++) { //On rempli les bons matchs
+                    if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                        arrDm[idxTab] = matches.get(i);
+                        idxTab++;
+                    }
                 }
-            }
-            goodMatchs.put(arrDm);
+                goodMatchs.put(arrDm);
 
-            float d = moyenneDistance(arrDm);
-
-            if(bMatch > d){
-                bMatch = d;
-                retour = logopath;
+                float d = moyenneDistance(arrDm);
+                refLogos.get(classes).put(logopath, d);
             }
-            refLogos.put(logopath,d);
         }
-
+        //Calcul du meilleur match
+        //Map<String, Float> moyClasses = new HashMap<>();
+        for(String classes : refLogos.keySet()) {
+            Float moy = 0f;
+            for(String logo : refLogos.get(classes).keySet()) {
+                moy += refLogos.get(classes).get(logo);
+            }
+            //moyClasses.put(classes, );
+            moy = moy / refLogos.get(classes).size();
+            if (bMatch > moy) {
+                bMatch = moy;
+                retour = refLogos.get(classes).keySet().iterator().next();
+            }
+        }
         return retour;
     }
 
 
     public float moyenneDistance(DMatch[] arrDm) {
         float distance = 0;
-        for(int i = 0;i<arrDm.length;i++) {
-         distance+=  arrDm[i].distance();
+        for (int i = 0; i < arrDm.length; i++) {
+            distance += arrDm[i].distance();
 
         }
         return distance / arrDm.length;
