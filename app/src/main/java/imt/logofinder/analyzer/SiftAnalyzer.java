@@ -40,9 +40,9 @@ public class SiftAnalyzer {
     private final String DB_PATH = "/logodb/";
     private final int nFeatures = 0;
     private final int nOctaveLayer = 3;
-    private final double contrastThreshold = 0.1;
-    private final double edgeThreshold = 10.0;
-    private final double sigma = 1.6;
+    private final double contrastThreshold = 0.03;
+    private final double edgeThreshold = 11.0;
+    private final double sigma = 1.7;
     private final double matchRatio = 0.8;
 
 
@@ -85,7 +85,7 @@ public class SiftAnalyzer {
         String retour ="";
         for (String logopath : refLogos.keySet()) {
             Mat logo = imread(logopath);
-            resize(logo, logo, new Size(500, 500));
+            resize(logo, logo, new Size(400, 400));
 
             SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
             KeyPointVector keys_img = new KeyPointVector();
@@ -106,14 +106,14 @@ public class SiftAnalyzer {
             int idxTab = 0, sizeTab = 0;
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (sizeTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
                     sizeTab++;
                 }
             }
             arrDm = new DMatch[sizeTab];
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (idxTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
                     arrDm[idxTab] = matches.get(i);
                     idxTab++;
                 }
@@ -145,12 +145,7 @@ public class SiftAnalyzer {
                 nbMaxmatches = (int)goodMatchs.size();
                 retour = logopath;
             }
-
-
-
-
-
-
+            refLogos.put(logopath,(int)goodMatchs.size());
         }
         if(nbMaxmatches <=5){
             retour = "";//Pas de résultat
@@ -185,14 +180,14 @@ public class SiftAnalyzer {
             int idxTab = 0, sizeTab = 0;
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (sizeTab < 80 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
                     sizeTab++;
                 }
             }
             arrDm = new DMatch[sizeTab];
 
             for (int i = 0; i < idx.rows(); i++) {
-                if (idxTab < 80 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                if (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance()) {
                     arrDm[idxTab] = matches.get(i);
                     idxTab++;
                 }
