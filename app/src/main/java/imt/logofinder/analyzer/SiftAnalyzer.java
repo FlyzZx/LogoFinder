@@ -107,32 +107,12 @@ public class SiftAnalyzer {
                 DMatchVector matches = new DMatchVector();
                 matcher.match(desc_img, desc_logo, matches);
                 //matcher.knnMatch(desc_img, desc_logo, matches, 2);
-                DMatchVector goodMatchs = new DMatchVector();
-                FloatRawIndexer idx = desc_img.createIndexer();
 
-                DMatch[] arrDm;
-                int idxTab = 0, sizeTab = 0;
-
-                for (int i = 0; i < idx.rows(); i++) { //On calcule la taille du tableau
-                    if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        sizeTab++;
-                    }
-                }
-                arrDm = new DMatch[sizeTab];
-
-                for (int i = 0; i < idx.rows(); i++) { //On rempli les bons matchs
-                    if (i < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        arrDm[idxTab] = matches.get(i);
-                        idxTab++;
-                    }
-                }
-                goodMatchs.put(arrDm);
-
-                float d = moyenneDistance(arrDm);
+                float d = moyenneDistance(matches);
                 refLogos.get(classes).put(logopath, d);
             }
         }
-        //Calcul du meilleur match
+        //Récupération du meilleur match
         //Map<String, Float> moyClasses = new HashMap<>();
         for(String classes : refLogos.keySet()) {
             Float moy = 0f;
@@ -150,12 +130,12 @@ public class SiftAnalyzer {
     }
 
 
-    public float moyenneDistance(DMatch[] arrDm) {
+    public float moyenneDistance(DMatchVector arrDm) {
         float distance = 0;
-        for (int i = 0; i < arrDm.length; i++) {
-            distance += arrDm[i].distance();
+        for (int i = 0; i < arrDm.size(); i++) {
+            distance += arrDm.get(i).distance();
 
         }
-        return distance / arrDm.length;
+        return distance / arrDm.size();
     }
 }
