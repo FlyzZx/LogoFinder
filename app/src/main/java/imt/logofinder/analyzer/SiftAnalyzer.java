@@ -108,7 +108,29 @@ public class SiftAnalyzer {
                 matcher.match(desc_img, desc_logo, matches);
                 //matcher.knnMatch(desc_img, desc_logo, matches, 2);
 
-                float d = moyenneDistance(matches);
+                //Récupération des meilleurs matchs
+                DMatchVector goodMatchs = new DMatchVector();
+                FloatRawIndexer idx = desc_img.createIndexer();
+
+                DMatch[] arrDm;
+                int idxTab = 0, sizeTab = 0;
+
+                for (int i = 0; i < idx.rows(); i++) {
+                    if (sizeTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                        sizeTab++;
+                    }
+                }
+                arrDm = new DMatch[sizeTab];
+
+                for (int i = 0; i < idx.rows(); i++) {
+                    if (idxTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
+                        arrDm[idxTab] = matches.get(i);
+                        idxTab++;
+                    }
+                }
+                goodMatchs.put(arrDm);
+
+                float d = moyenneDistance(arrDm);
                 refLogos.get(classes).put(logopath, d);
             }
         }
@@ -130,12 +152,11 @@ public class SiftAnalyzer {
     }
 
 
-    public float moyenneDistance(DMatchVector arrDm) {
+    public float moyenneDistance(DMatch[] arrDm) {
         float distance = 0;
-        for (int i = 0; i < arrDm.size(); i++) {
-            distance += arrDm.get(i).distance();
-
+        for(int i = 0;i<arrDm.length;i++) {
+            distance+=  arrDm[i].distance();
         }
-        return distance / arrDm.size();
+        return distance / arrDm.length;
     }
 }
