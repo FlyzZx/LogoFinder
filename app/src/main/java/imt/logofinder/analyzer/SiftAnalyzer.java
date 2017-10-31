@@ -136,7 +136,7 @@ public class SiftAnalyzer {
         }
         //Récupération du meilleur match
         //Map<String, Float> moyClasses = new HashMap<>();
-        for(String classes : refLogos.keySet()) {
+        /*for(String classes : refLogos.keySet()) {
             Float moy = 0f;
             for(String logo : refLogos.get(classes).keySet()) {
                 moy += refLogos.get(classes).get(logo);
@@ -148,6 +148,68 @@ public class SiftAnalyzer {
                 retour = refLogos.get(classes).keySet().iterator().next();
             }
         }
+        */
+        Map<String , Float> tri = new HashMap<>();
+
+        for(String classes : refLogos.keySet()) {
+            for(String logo : refLogos.get(classes).keySet()){
+
+                if(tri.values().size() < 3 ){
+                    tri.put(logo,refLogos.get(classes).get(logo));
+                }
+                else{
+                    Float temp = 0f;
+                    String tempStr ="";
+                    for(String cle : tri.keySet()){
+                        if(tri.get(cle) > temp ){
+                            temp = tri.get(cle);
+                            tempStr = cle;
+                        }
+                    }//on determine la plus grande valeur dans notre liste
+                    if(refLogos.get(classes).get(logo) < temp ){
+                        tri.remove(tempStr);
+                        tri.put(logo,refLogos.get(classes).get(logo));
+                    }
+                }
+
+
+            }
+
+        }
+
+        //On as les 3 plus petites distances dans tri
+        int compteur=0 ;
+
+        for(String classes : refLogos.keySet()){
+            int cnt = 0;
+            for(String k : tri.keySet()){
+               if(refLogos.get(classes).containsKey(k)){
+
+                   cnt++;
+
+               }
+            }
+            if(cnt > compteur){
+                compteur = cnt;
+                retour = refLogos.get(classes).keySet().iterator().next();
+                //retour est égal à la première image de la classe qui possède le plus d'images dans le top 3 des images avec les plus petites distances
+            }
+        }
+        if(compteur == 1){//Il n'y a pas deux images d'une même classe dans les 3 plus petites distances
+            Float temp = 10000f;
+            String tempStr = "";
+            for(String cle : tri.keySet()){
+                if(tri.get(cle) < temp ){
+                    temp = tri.get(cle);
+                    tempStr = cle;
+                }
+            }//on determine la distance la plus petite
+            retour = tempStr;
+
+        }
+
+
+
         return retour;
     }
 
