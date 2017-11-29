@@ -17,10 +17,6 @@ import imt.logofinder.http.HttpRequest;
 
 public class RemoteTraining {
 
-    private static final int TAG_INDEX = 1;
-    private static final int TAG_VOCABULARY = 2;
-    private static final int TAG_CLASSIFIER = 3;
-
     private final String URL_REPO = "http://www-rech.telecom-lille.fr/nonfreesift/";
     private final String URL_INDEX = URL_REPO + "index.json";
     private final String URL_CLASS = URL_REPO + "classifiers/";
@@ -30,12 +26,12 @@ public class RemoteTraining {
 
     public RemoteTraining() {
         brands = new ArrayList<>();
-        HttpRequest index = new HttpRequest(TAG_INDEX);
+        HttpRequest index = new HttpRequest();
         try {
             String data = index.execute(URL_INDEX).get();
             JSONObject jsonObject = new JSONObject(data);
             if(jsonObject.has("vocabulary")) {
-                HttpRequest voc_req = new HttpRequest(TAG_VOCABULARY);
+                HttpRequest voc_req = new HttpRequest();
                 this.vocabulary = voc_req.execute(URL_REPO + jsonObject.getString("vocabulary")).get();
             }
             if(jsonObject.has("brands")) {

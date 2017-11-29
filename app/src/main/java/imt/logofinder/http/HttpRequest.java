@@ -14,13 +14,6 @@ import java.net.URL;
  */
 
 public class HttpRequest extends AsyncTask<String, Integer, String> {
-
-    private Integer tag = null;
-
-    public HttpRequest(Integer tag) {
-        this.tag = tag;
-    }
-
     @Override
     protected String doInBackground(String... strings) {
         HttpURLConnection http = null;

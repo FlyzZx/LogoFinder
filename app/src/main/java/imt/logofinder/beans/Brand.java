@@ -22,7 +22,7 @@ public class Brand {
         this.brandname = brandname;
         this.url = url;
         this.images = images;
-        HttpRequest class_req = new HttpRequest(TAG_CLASSIFIER);
+        HttpRequest class_req = new HttpRequest();
         try {
             this.classifier = class_req.execute(classifier).get();
         } catch (InterruptedException e) {
