@@ -5,5 +5,5 @@ package imt.logofinder.http;
  */
 
 public interface HttpCallback {
-    public void onHttpResponse(String data);
+    public void onHttpResponse(Integer tag, String data);
 }

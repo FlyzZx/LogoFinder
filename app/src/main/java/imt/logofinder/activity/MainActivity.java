@@ -36,11 +36,12 @@ import java.security.Permission;
 import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
+import imt.logofinder.analyzer.RemoteTraining;
 import imt.logofinder.analyzer.SiftAnalyzer;
 import imt.logofinder.http.HttpCallback;
 import imt.logofinder.http.HttpRequest;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, HttpCallback {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int IMAGE_CAP = 1;
     private static final int GALLERY_CAP = 2;
@@ -103,23 +104,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        RemoteTraining remoteTraining;
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
-            try {
-                SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                String outPath = siftAnalyzer.analyze();
-                this.outPath = outPath;
-                if (this.outPath.equals("")) {
-                    Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
-                } else {
-                    Intent secretDebug = new Intent(this, SecretDebugActivity.class);
-                    secretDebug.putExtra("imgPath", outPath);
-                    startActivity(secretDebug);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            remoteTraining = new RemoteTraining();
+            Log.d("REMOTE T", remoteTraining.getVocabulary());
         }
         return true;
     }
@@ -136,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
-               /* try {
+                try {
                     SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
                     String outPath = siftAnalyzer.analyze();
                     this.outPath = outPath;
@@ -150,9 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                }*/
-                HttpRequest req = new HttpRequest(this);
-                req.execute("http://www-rech.telecom-lille.fr/nonfreesift/index.json");
+                }
                 break;
             default:
                 break;
@@ -324,11 +310,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.e("tag", e.getMessage());
         }
 
-    }
-
-    @Override
-    public void onHttpResponse(String data) {
-        Log.d("RETOUR", data);
     }
 }
 

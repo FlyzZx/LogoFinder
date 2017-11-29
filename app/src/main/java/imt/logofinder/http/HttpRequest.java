@@ -16,9 +16,11 @@ import java.net.URL;
 public class HttpRequest extends AsyncTask<String, Integer, String> {
 
     private HttpCallback httpCallback = null;
+    private Integer tag = null;
 
-    public HttpRequest(HttpCallback callback) {
+    public HttpRequest(HttpCallback callback, Integer tag) {
         this.httpCallback = callback;
+        this.tag = tag;
     }
 
     @Override
@@ -53,6 +55,6 @@ public class HttpRequest extends AsyncTask<String, Integer, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        httpCallback.onHttpResponse(s);
+        httpCallback.onHttpResponse(tag, s);
     }
 }
