@@ -1,17 +1,15 @@
 package imt.logofinder.beans;
 
-import android.util.Log;
-
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import imt.logofinder.http.HttpCallback;
 import imt.logofinder.http.HttpRequest;
 
 /**
  * Created by 41000440 on 29/11/2017.
  */
 
-public class Brand implements HttpCallback {
+public class Brand {
 
     private final static Integer TAG_CLASSIFIER = 1;
 
@@ -24,8 +22,14 @@ public class Brand implements HttpCallback {
         this.brandname = brandname;
         this.url = url;
         this.images = images;
-        HttpRequest class_req = new HttpRequest(this, TAG_CLASSIFIER);
-        class_req.execute(classifier);
+        HttpRequest class_req = new HttpRequest(TAG_CLASSIFIER);
+        try {
+            this.classifier = class_req.execute(classifier).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getBrandname() {
@@ -58,13 +62,5 @@ public class Brand implements HttpCallback {
 
     public void setImages(List<String> images) {
         this.images = images;
-    }
-
-    @Override
-    public void onHttpResponse(Integer tag, String data) {
-        Log.d(this.brandname, data);
-        if(!data.isEmpty()) {
-            this.classifier = data;
-        }
     }
 }

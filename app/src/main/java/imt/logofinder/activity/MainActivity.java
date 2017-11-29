@@ -32,14 +32,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.Permission;
-import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
 import imt.logofinder.analyzer.RemoteTraining;
 import imt.logofinder.analyzer.SiftAnalyzer;
-import imt.logofinder.http.HttpCallback;
-import imt.logofinder.http.HttpRequest;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -107,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RemoteTraining remoteTraining;
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             remoteTraining = new RemoteTraining();
-            Log.d("REMOTE T", remoteTraining.getVocabulary());
         }
         return true;
     }

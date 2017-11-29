@@ -1,23 +1,21 @@
 package imt.logofinder.analyzer;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import imt.logofinder.beans.Brand;
-import imt.logofinder.http.HttpCallback;
 import imt.logofinder.http.HttpRequest;
 
 /**
  * Created by 41000440 on 29/11/2017.
  */
 
-public class RemoteTraining implements HttpCallback {
+public class RemoteTraining {
 
     private static final int TAG_INDEX = 1;
     private static final int TAG_VOCABULARY = 2;
@@ -32,47 +30,37 @@ public class RemoteTraining implements HttpCallback {
 
     public RemoteTraining() {
         brands = new ArrayList<>();
-        HttpRequest index = new HttpRequest(this, TAG_INDEX);
-        index.execute(URL_INDEX);
-    }
-
-    @Override
-    public void onHttpResponse(Integer tag, String data) {
-        switch(tag) {
-            case TAG_INDEX:
-                try {
-                    JSONObject jsonObject = new JSONObject(data);
-                    if(jsonObject.has("vocabulary")) {
-                        HttpRequest voc_req = new HttpRequest(this, TAG_VOCABULARY);
-                        voc_req.execute(URL_REPO + jsonObject.getString("vocabulary"));
+        HttpRequest index = new HttpRequest(TAG_INDEX);
+        try {
+            String data = index.execute(URL_INDEX).get();
+            JSONObject jsonObject = new JSONObject(data);
+            if(jsonObject.has("vocabulary")) {
+                HttpRequest voc_req = new HttpRequest(TAG_VOCABULARY);
+                this.vocabulary = voc_req.execute(URL_REPO + jsonObject.getString("vocabulary")).get();
+            }
+            if(jsonObject.has("brands")) {
+                JSONArray jArr = (JSONArray) jsonObject.get("brands");
+                for(int i = 0; i < jArr.length(); i++) {
+                    JSONObject b = (JSONObject) jArr.get(i);
+                    String brandname = b.getString("brandname");
+                    String url = b.getString("url");
+                    String class_path = URL_CLASS + b.getString("classifier");
+                    List<String> img_path = new ArrayList<>();
+                    JSONArray imgs = (JSONArray) b.get("images");
+                    for(int j = 0; j < imgs.length(); j++) {
+                        img_path.add(String.valueOf(imgs.get(j)));
                     }
-                    if(jsonObject.has("brands")) {
-                        JSONArray jArr = (JSONArray) jsonObject.get("brands");
-                        for(int i = 0; i < jArr.length(); i++) {
-                            JSONObject b = (JSONObject) jArr.get(i);
-                            String brandname = b.getString("brandname");
-                            String url = b.getString("url");
-                            String class_path = URL_CLASS + b.getString("classifier");
-                            List<String> img_path = new ArrayList<>();
-                            JSONArray imgs = (JSONArray) b.get("images");
-                            for(int j = 0; j < imgs.length(); j++) {
-                                img_path.add(String.valueOf(imgs.get(j)));
-                            }
 
-                            Brand brand = new Brand(brandname, url, class_path, img_path);
-                            brands.add(brand);
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    Brand brand = new Brand(brandname, url, class_path, img_path);
+                    brands.add(brand);
                 }
-                break;
-            case TAG_VOCABULARY:
-                //Log.d("VOCABULARY", data);
-                this.vocabulary = data;
-                break;
-            default:
-                break;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
