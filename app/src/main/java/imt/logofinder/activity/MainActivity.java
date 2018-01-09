@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String outPath = "";
     private Bitmap image;
 
+    private RemoteTraining remoteTraining;
+
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
     private Button btn_analyze = null;
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        RemoteTraining remoteTraining = null;
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             remoteTraining = new RemoteTraining();
         }
