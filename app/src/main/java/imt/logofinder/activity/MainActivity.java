@@ -1,7 +1,9 @@
 package imt.logofinder.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +13,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -27,19 +32,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 
 import imt.logofinder.R;
+import imt.logofinder.analyzer.RemoteTraining;
 import imt.logofinder.analyzer.SiftAnalyzer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int IMAGE_CAP = 1;
     private static final int GALLERY_CAP = 2;
+    private static final int RETURN_PERM = 100;
 
     private String tempPath = "";
     private String outPath = "";
     private Bitmap image;
+
+    private RemoteTraining remoteTraining;
 
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
@@ -47,15 +55,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView imageView_main = null;
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case RETURN_PERM:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    this.finish();
+                }
+                break;
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /*
+         * PERMISSIONS
+         */
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET}, RETURN_PERM);
+        }
+
         /*
         Initialisation des composants
          */
 
-        //Bouton prise de photo
-        this.btn_takePic = (Button) findViewById(R.id.btn_takePic);
+            //Bouton prise de photo
+            this.btn_takePic = (Button) findViewById(R.id.btn_takePic);
         this.btn_takePic.setOnClickListener(this);
         //Bouton récupération depuis gallerie
         this.btn_choosePic = (Button) findViewById(R.id.btn_choosePic);
@@ -72,22 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
-            try {
-                SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                String outPath = siftAnalyzer.analyze();
-                this.outPath = outPath;
-                if (this.outPath.equals("")) {
-                    Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
-                } else {
-                    Intent secretDebug = new Intent(this, SecretDebugActivity.class);
-                    secretDebug.putExtra("imgPath", outPath);
-                    startActivity(secretDebug);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            remoteTraining = new RemoteTraining();
         }
         return true;
     }
@@ -97,11 +113,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = view.getId();
         switch (id) {
             case R.id.btn_takePic:
-               // eraseFileTemp();
+                // eraseFileTemp();
                 takePic();
                 break;
             case R.id.btn_choosePic:
-               // eraseFileTemp();
+                // eraseFileTemp();
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
@@ -119,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 break;
             default:
                 break;
@@ -218,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         super.onStop();
-       // eraseFileTemp();
+        // eraseFileTemp();
     }
 
     public Bitmap findGoodImageOrientation() {

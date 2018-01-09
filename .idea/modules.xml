@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LogoFinder.iml" filepath="$PROJECT_DIR$/LogoFinder.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../../41000440/Documents/AndroidProjects/LogoFinder/LogoFinder.iml" filepath="$PROJECT_DIR$/../../../41000440/Documents/AndroidProjects/LogoFinder/LogoFinder.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../../41000440/Documents/AndroidProjects/LogoFinder/app/app.iml" filepath="$PROJECT_DIR$/../../../41000440/Documents/AndroidProjects/LogoFinder/app/app.iml" />
     </modules>
   </component>
 </project>
