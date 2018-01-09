@@ -33,6 +33,12 @@ public class RemoteTraining {
             if(jsonObject.has("vocabulary")) {
                 HttpRequest voc_req = new HttpRequest();
                 this.vocabulary = voc_req.execute(URL_REPO + jsonObject.getString("vocabulary")).get();
+
+                String toFind = "%YAML:1.0\r\n"; //Suppression de ce tag pour le passage en Mat
+                int idxF = vocabulary.indexOf(toFind) + toFind.length();
+                if(idxF >= toFind.length()) {
+                    vocabulary = vocabulary.substring(idxF);
+                }
             }
             if(jsonObject.has("brands")) {
                 JSONArray jArr = (JSONArray) jsonObject.get("brands");

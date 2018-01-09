@@ -3,6 +3,7 @@ package imt.logofinder.analyzer;
 import android.content.Context;
 import android.os.Environment;
 
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
@@ -47,45 +48,39 @@ public class SiftAnalyzer {
 
 
     private Mat image_scn = null;
+    private Mat vocabulary = null;
+
+    // TODO: 09/01/2018 A changer pour les descripteurs
     private Map<String, Map<String, Float>> refLogos = null;
 
     private Context context;
+    private RemoteTraining dictionnary;
 
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
-        if (image_scn.isEmpty()) {
+       /* if (image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
 
         this.image_scn = imread(image_scn);
-        resize(this.image_scn, this.image_scn, new Size(400, 600));
+        resize(this.image_scn, this.image_scn, new Size(400, 600));*/
         this.context = context;
         initialize();
     }
 
     /**
-     * Fonction d'initialisation des images de reférence vers des Mat OpenCV
+     * Fonction d'initialisation des images de reférence vers des descripteurs OpenCV
+     *
      */
-    public void initialize() {
-        refLogos = new HashMap<>();
+    private void initialize() {
+        dictionnary = new RemoteTraining();
 
-        File dir = Environment.getExternalStorageDirectory();
-        String dbPath = dir.getPath() + this.DB_PATH;
-        File dbDirectory = new File(dbPath);
+        //Chargement du vocabulaire
 
-        File[] logos = dbDirectory.listFiles();
-        for (File f : logos) {
-            String name = f.getName();
-            Map<String, Float> logoData = new HashMap<>();
-            for (File lo : f.listFiles()) {
-                logoData.put(lo.getAbsolutePath(), 0f);
-            }
-            refLogos.put(name, logoData);
-            //refLogos.put(f.getAbsolutePath(), 0f);
-        }
     }
 
     /**
      * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
+     * // TODO: 09/01/2018 Utilisation du RemoteTraining pour BOW 
      */
     public String analyze() {
         float bMatch = 100000f; //Très grande distance
