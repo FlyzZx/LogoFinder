@@ -130,11 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (this.outPath.equals("")) {
                         Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
                     } else {
-                        Intent secretDebug = new Intent(this, SecretDebugActivity.class);
-                        secretDebug.putExtra("imgPath", outPath);
-                        startActivity(secretDebug);
+                        Toast.makeText(this, this.outPath, Toast.LENGTH_LONG).show();
                     }
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

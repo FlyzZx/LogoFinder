@@ -54,23 +54,21 @@ public class SiftAnalyzer {
     private Mat image_scn = null;
     private Mat vocabulary = null;
 
-    // TODO: 09/01/2018 A changer pour les descripteurs
-    private Map<String, Map<String, Float>> refLogos = null;
-
     private Context context;
     private RemoteTraining dictionnary;
     private SIFT detector;
     private opencv_features2d.FlannBasedMatcher matcher;
     private opencv_features2d.BOWImgDescriptorExtractor bowide;
+    private opencv_ml.SVM[] classifiers;
 
 
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
-       /* if (image_scn.isEmpty()) {
+       if (image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
 
         this.image_scn = imread(image_scn);
-        resize(this.image_scn, this.image_scn, new Size(400, 600));*/
+        resize(this.image_scn, this.image_scn, new Size(400, 600));
         this.context = context;
         initialize();
     }
@@ -95,7 +93,6 @@ public class SiftAnalyzer {
         this.bowide = new opencv_features2d.BOWImgDescriptorExtractor(detector, matcher);
         this.bowide.setVocabulary(this.vocabulary);
 
-        final opencv_ml.SVM[] classifiers;
         classifiers = new opencv_ml.SVM[dictionnary.getBrands().size()];
         for (int i = 0 ; i < dictionnary.getBrands().size() ; i++) {
             //System.out.println("Ok. Creating class name from " + className);
@@ -103,8 +100,6 @@ public class SiftAnalyzer {
             classifiers[i] = opencv_ml.SVM.create();
             classifiers[i] = opencv_ml.SVM.load(dictionnary.getBrands().get(i).getClassifier());
         }
-
-        int a = 2;
     }
 
     /**
@@ -112,7 +107,31 @@ public class SiftAnalyzer {
      * // TODO: 09/01/2018 Utilisation du RemoteTraining pour BOW 
      */
     public String analyze() {
-        return "";
+        Mat response_hist = new Mat();
+        KeyPointVector keypoints = new KeyPointVector();
+        Mat inputDescriptors = new Mat();
+        detector.detectAndCompute(image_scn, new Mat(), keypoints, inputDescriptors);
+        bowide.compute(image_scn, keypoints, response_hist);
+
+        //Recherche du meilleur match
+        float minF = Float.MAX_VALUE;
+        String bestMatch = null;
+
+        long timePrediction = System.currentTimeMillis();
+
+        for(int i = 0; i < classifiers.length; i++) {
+            float res = classifiers[i].predict(response_hist);
+
+            if(res < minF) {
+                minF = res;
+                bestMatch = dictionnary.getBrands().get(i).getBrandname();
+            }
+        }
+        timePrediction = System.currentTimeMillis() - timePrediction;
+
+        if(bestMatch != null) {
+            return bestMatch + " in " + timePrediction + " ms";
+        } else return "";
     }
 
 
