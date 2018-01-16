@@ -3,6 +3,7 @@ package imt.logofinder.analyzer;
 import android.content.Context;
 import android.os.Environment;
 
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
@@ -25,6 +26,8 @@ import static org.bytedeco.javacpp.opencv_calib3d.RANSAC;
 import static org.bytedeco.javacpp.opencv_calib3d.findHomography;
 import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
 import static org.bytedeco.javacpp.opencv_core.CV_64FC1;
+import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
+import static org.bytedeco.javacpp.opencv_core.KMEANS_PP_CENTERS;
 import static org.bytedeco.javacpp.opencv_core.perspectiveTransform;
 import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
 import static org.bytedeco.javacpp.opencv_imgcodecs.*;
@@ -55,6 +58,10 @@ public class SiftAnalyzer {
 
     private Context context;
     private RemoteTraining dictionnary;
+    private SIFT detector;
+    private opencv_features2d.FlannBasedMatcher matcher;
+    private opencv_features2d.BOWImgDescriptorExtractor bowide;
+
 
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
        /* if (image_scn.isEmpty()) {
@@ -69,12 +76,19 @@ public class SiftAnalyzer {
 
     /**
      * Fonction d'initialisation des images de reférence vers des descripteurs OpenCV
-     *
+     *  // TODO: 16/01/2018 A modifier pour enlever le déprecated CvMat
      */
     private void initialize() {
         dictionnary = new RemoteTraining();
 
         //Chargement du vocabulaire
+        Loader.load(opencv_core.class);
+        opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(dictionnary.getVocabulary(), null, opencv_core.CV_STORAGE_READ);
+        Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList());
+        //opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
+        vocabulary = new opencv_core.Mat(p);
+        opencv_core.cvReleaseFileStorage(storage);
+
 
     }
 
@@ -89,6 +103,8 @@ public class SiftAnalyzer {
             for (String logopath : refLogos.get(classes).keySet()) {
                 Mat logo = imread(logopath);
                 resize(logo, logo, new Size(400, 400));
+
+
 
                 SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
                 KeyPointVector keys_img = new KeyPointVector();
