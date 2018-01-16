@@ -10,6 +10,7 @@ import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
 import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacpp.opencv_features2d.BFMatcher;
+import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_xfeatures2d;
 
 import java.io.File;
@@ -85,11 +86,25 @@ public class SiftAnalyzer {
         Loader.load(opencv_core.class);
         opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(dictionnary.getVocabulary(), null, opencv_core.CV_STORAGE_READ);
         Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList());
-        //opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
-        vocabulary = new opencv_core.Mat(p);
+        opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
+        vocabulary = new opencv_core.Mat(cvMat);
         opencv_core.cvReleaseFileStorage(storage);
 
+        this.detector = SIFT.create(this.nFeatures, this.nOctaveLayer, this.contrastThreshold, this.edgeThreshold, this.sigma);
+        this.matcher = new opencv_features2d.FlannBasedMatcher();
+        this.bowide = new opencv_features2d.BOWImgDescriptorExtractor(detector, matcher);
+        this.bowide.setVocabulary(this.vocabulary);
 
+        final opencv_ml.SVM[] classifiers;
+        classifiers = new opencv_ml.SVM[dictionnary.getBrands().size()];
+        for (int i = 0 ; i < dictionnary.getBrands().size() ; i++) {
+            //System.out.println("Ok. Creating class name from " + className);
+            //open the file to write the resultant descriptor
+            classifiers[i] = opencv_ml.SVM.create();
+            classifiers[i] = opencv_ml.SVM.load(dictionnary.getBrands().get(i).getClassifier());
+        }
+
+        int a = 2;
     }
 
     /**
@@ -97,131 +112,7 @@ public class SiftAnalyzer {
      * // TODO: 09/01/2018 Utilisation du RemoteTraining pour BOW 
      */
     public String analyze() {
-        float bMatch = 100000f; //Très grande distance
-        String retour = "";
-        for (String classes : refLogos.keySet()) {
-            for (String logopath : refLogos.get(classes).keySet()) {
-                Mat logo = imread(logopath);
-                resize(logo, logo, new Size(400, 400));
-
-
-
-                SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
-                KeyPointVector keys_img = new KeyPointVector();
-                KeyPointVector keys_logo = new KeyPointVector();
-                Mat desc_img = new Mat();
-                Mat desc_logo = new Mat();
-                sift.detectAndCompute(image_scn, new Mat(), keys_img, desc_img);
-                sift.detectAndCompute(logo, new Mat(), keys_logo, desc_logo);
-
-                BFMatcher matcher = new BFMatcher();
-                DMatchVector matches = new DMatchVector();
-                matcher.match(desc_img, desc_logo, matches);
-                //matcher.knnMatch(desc_img, desc_logo, matches, 2);
-
-                //Récupération des meilleurs matchs
-                DMatchVector goodMatchs = new DMatchVector();
-                FloatRawIndexer idx = desc_img.createIndexer();
-
-                DMatch[] arrDm;
-                int idxTab = 0, sizeTab = 0;
-
-                for (int i = 0; i < idx.rows(); i++) {
-                    if (sizeTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        sizeTab++;
-                    }
-                }
-                arrDm = new DMatch[sizeTab];
-
-                for (int i = 0; i < idx.rows(); i++) {
-                    if (idxTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        arrDm[idxTab] = matches.get(i);
-                        idxTab++;
-                    }
-                }
-                goodMatchs.put(arrDm);
-
-                float d = moyenneDistance(arrDm);
-                refLogos.get(classes).put(logopath, d);
-            }
-        }
-        //Récupération du meilleur match
-        //Map<String, Float> moyClasses = new HashMap<>();
-        /*for(String classes : refLogos.keySet()) {
-            Float moy = 0f;
-            for(String logo : refLogos.get(classes).keySet()) {
-                moy += refLogos.get(classes).get(logo);
-            }
-            //moyClasses.put(classes, );
-            moy = moy / refLogos.get(classes).size();
-            if (bMatch > moy) {
-                bMatch = moy;
-                retour = refLogos.get(classes).keySet().iterator().next();
-            }
-        }
-        */
-        Map<String , Float> tri = new HashMap<>();
-
-        for(String classes : refLogos.keySet()) {
-            for(String logo : refLogos.get(classes).keySet()){
-
-                if(tri.values().size() < 3 ){
-                    tri.put(logo,refLogos.get(classes).get(logo));
-                }
-                else{
-                    Float temp = 0f;
-                    String tempStr ="";
-                    for(String cle : tri.keySet()){
-                        if(tri.get(cle) > temp ){
-                            temp = tri.get(cle);
-                            tempStr = cle;
-                        }
-                    }//on determine la plus grande valeur dans notre liste
-                    if(refLogos.get(classes).get(logo) < temp ){
-                        tri.remove(tempStr);
-                        tri.put(logo,refLogos.get(classes).get(logo));
-                    }
-                }
-
-
-            }
-
-        }
-
-        //On as les 3 plus petites distances dans tri
-        int compteur=0 ;
-
-        for(String classes : refLogos.keySet()){
-            int cnt = 0;
-            for(String k : tri.keySet()){
-               if(refLogos.get(classes).containsKey(k)){
-
-                   cnt++;
-
-               }
-            }
-            if(cnt > compteur){
-                compteur = cnt;
-                retour = refLogos.get(classes).keySet().iterator().next();
-                //retour est égal à la première image de la classe qui possède le plus d'images dans le top 3 des images avec les plus petites distances
-            }
-        }
-        if(compteur == 1){//Il n'y a pas deux images d'une même classe dans les 3 plus petites distances
-            Float temp = 10000f;
-            String tempStr = "";
-            for(String cle : tri.keySet()){
-                if(tri.get(cle) < temp ){
-                    temp = tri.get(cle);
-                    tempStr = cle;
-                }
-            }//on determine la distance la plus petite
-            retour = tempStr;
-
-        }
-
-
-
-        return retour;
+        return "";
     }
 
 

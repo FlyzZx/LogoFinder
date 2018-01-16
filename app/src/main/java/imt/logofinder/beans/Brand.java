@@ -36,6 +36,9 @@ public class Brand {
             FileWriter fileWriter = new FileWriter(fVoc);
             fileWriter.write(this.classifier);
             fileWriter.close();
+
+            this.classifier = Environment.getExternalStorageDirectory() + "/dictio/" + this.brandname + ".xml";
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
