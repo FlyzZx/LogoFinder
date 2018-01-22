@@ -18,6 +18,7 @@ import imt.logofinder.http.HttpRequest;
 
 /**
  * Created by 41000440 on 29/11/2017.
+ * // TODO: 22/01/2018 Télécharger le dictionnaire uniquement s'il est différent 
  */
 
 public class RemoteTraining {

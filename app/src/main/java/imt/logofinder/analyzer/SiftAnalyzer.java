@@ -6,6 +6,7 @@ import android.os.Environment;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
+import org.bytedeco.javacpp.indexer.UByteBufferIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
 import org.bytedeco.javacpp.opencv_features2d;
@@ -95,10 +96,12 @@ public class SiftAnalyzer {
 
         classifiers = new opencv_ml.SVM[dictionnary.getBrands().size()];
         for (int i = 0 ; i < dictionnary.getBrands().size() ; i++) {
-            //System.out.println("Ok. Creating class name from " + className);
+
             //open the file to write the resultant descriptor
             classifiers[i] = opencv_ml.SVM.create();
             classifiers[i] = opencv_ml.SVM.load(dictionnary.getBrands().get(i).getClassifier());
+            System.out.println("Ok. Creating class name from ");
+
         }
     }
 
@@ -107,11 +110,12 @@ public class SiftAnalyzer {
      * // TODO: 09/01/2018 Utilisation du RemoteTraining pour BOW 
      */
     public String analyze() {
-        Mat response_hist = new Mat();
-        KeyPointVector keypoints = new KeyPointVector();
-        Mat inputDescriptors = new Mat();
-        detector.detectAndCompute(image_scn, new Mat(), keypoints, inputDescriptors);
-        bowide.compute(image_scn, keypoints, response_hist);
+        Mat response_hist = new Mat(); //Histogramme de sortie
+        KeyPointVector keypoints = new KeyPointVector(); //Keypoints de l'image d'entrée
+        Mat inputDescriptors = new Mat(); //Descripteur de l'image d'entrée
+        detector.detectAndCompute(image_scn, new Mat(), keypoints, inputDescriptors); //Detecte les keypoint et les descripteurs de l'image d'entrée
+        //detector.detect(image_scn, keypoints, new Mat());
+        bowide.compute(image_scn, keypoints, response_hist); //Calcul de la distance par rapport aux données présentes dans le dictionnaire BOW
 
         //Recherche du meilleur match
         float minF = Float.MAX_VALUE;
@@ -120,7 +124,14 @@ public class SiftAnalyzer {
         long timePrediction = System.currentTimeMillis();
 
         for(int i = 0; i < classifiers.length; i++) {
-            float res = classifiers[i].predict(response_hist);
+            Mat outputMatPredict = new Mat();
+
+            float res = classifiers[i].predict(response_hist, outputMatPredict, 1);
+            FloatRawIndexer indexer = outputMatPredict.createIndexer();
+
+            if(outputMatPredict.cols() > 0 && outputMatPredict.rows() > 0) {
+                res = indexer.get(0, 0); //Récupération de la valeur dans la MAT
+            }
 
             if(res < minF) {
                 minF = res;
