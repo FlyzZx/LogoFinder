@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import imt.logofinder.R;
+import imt.logofinder.analyzer.LogoFinder;
 import imt.logofinder.analyzer.RemoteTraining;
 import imt.logofinder.analyzer.SiftAnalyzer;
 
@@ -101,12 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
-            try {
-                SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                keyCode = 1;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
         }
         return true;
     }
@@ -124,8 +120,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
-                    SiftAnalyzer siftAnalyzer = new SiftAnalyzer(this, this.tempPath);
-                    String outPath = siftAnalyzer.analyze();
+                    LogoFinder logoFinder = new LogoFinder();
+                    logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/vocabulary");
+                    logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/classifier"));
+                    String outPath = logoFinder.predict(this.tempPath);
                     this.outPath = outPath;
                     if (this.outPath.equals("")) {
                         Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
@@ -140,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
 
     private void imageFromGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
