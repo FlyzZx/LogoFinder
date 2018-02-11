@@ -63,6 +63,7 @@ public class SiftAnalyzer {
     private opencv_ml.SVM[] classifiers;
 
 
+
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
        if (image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
@@ -79,6 +80,7 @@ public class SiftAnalyzer {
      *  // TODO: 16/01/2018 A modifier pour enlever le déprecated CvMat
      */
     private void initialize() {
+
         dictionnary = new RemoteTraining();
 
         //Chargement du vocabulaire

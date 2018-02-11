@@ -30,14 +30,14 @@ public class Brand {
         HttpRequest class_req = new HttpRequest();
         try {
             this.classifier = class_req.execute(classifier).get();
-            File dictioFolder = new File(Environment.getExternalStorageDirectory(), "/dictio");
+            File dictioFolder = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers");
             if(!dictioFolder.exists()) dictioFolder.mkdirs();
-            File fVoc = new File(Environment.getExternalStorageDirectory(), "/dictio/" + this.brandname + ".xml");
+            File fVoc = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers/" + this.brandname + ".xml");
             FileWriter fileWriter = new FileWriter(fVoc);
             fileWriter.write(this.classifier);
             fileWriter.close();
 
-            this.classifier = Environment.getExternalStorageDirectory() + "/dictio/" + this.brandname + ".xml";
+            this.classifier = Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers/" + this.brandname + ".xml";
 
         } catch (InterruptedException e) {
             e.printStackTrace();

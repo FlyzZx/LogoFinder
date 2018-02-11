@@ -45,17 +45,20 @@ public class LogoFinder {
 	private String classifierDir = "";
 	private JSONObject indexJson = null;
 
+
 	public LogoFinder() {
 		this.rootDir = null;
+
 	}
 
 	public LogoFinder(String rootDirPath) {
 		this.rootDir = new File(rootDirPath);
+
 	}
 
 	private Mat buildVocabulary() {
 
-		File voc = new File(this.vocabularyDir + "/vocab.yml");
+		File voc = new File(this.vocabularyDir + "/vocabulary.yml");
 		if (voc.exists()) {
 			FileStorage loader = new FileStorage(voc.getAbsolutePath(), FileStorage.READ);
 			this.vocabulary = loader.get("vocabulary").mat();

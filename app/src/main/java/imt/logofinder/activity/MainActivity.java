@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import imt.logofinder.R;
 import imt.logofinder.analyzer.LogoFinder;
 import imt.logofinder.analyzer.RemoteTraining;
+import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.analyzer.SiftAnalyzer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String tempPath = "";
     private String outPath = "";
     private Bitmap image;
+
+    private ServerTraining servertest;
 
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
@@ -120,9 +123,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
+
+                    this.servertest = new ServerTraining();
                     LogoFinder logoFinder = new LogoFinder();
-                    logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/vocabulary");
-                    logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/classifier"));
+                    logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
+                    logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
                     String outPath = logoFinder.predict(this.tempPath);
                     this.outPath = outPath;
                     if (this.outPath.equals("")) {
