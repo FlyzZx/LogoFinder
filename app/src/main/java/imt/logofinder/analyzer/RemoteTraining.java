@@ -1,9 +1,14 @@
 package imt.logofinder.analyzer;
 
+import android.os.Environment;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +18,7 @@ import imt.logofinder.http.HttpRequest;
 
 /**
  * Created by 41000440 on 29/11/2017.
+ * // TODO: 22/01/2018 Télécharger le dictionnaire uniquement s'il est différent 
  */
 
 public class RemoteTraining {
@@ -33,6 +39,14 @@ public class RemoteTraining {
             if(jsonObject.has("vocabulary")) {
                 HttpRequest voc_req = new HttpRequest();
                 this.vocabulary = voc_req.execute(URL_REPO + jsonObject.getString("vocabulary")).get();
+
+                File dictioFolder = new File(Environment.getExternalStorageDirectory(), "/dictio");
+                if(!dictioFolder.exists()) dictioFolder.mkdirs();
+                File fVoc = new File(Environment.getExternalStorageDirectory(), "/dictio/vocabulary.yml");
+                FileWriter fileWriter = new FileWriter(fVoc);
+                fileWriter.write(vocabulary);
+                fileWriter.close();
+                vocabulary = Environment.getExternalStorageDirectory() + "/dictio/vocabulary.yml";
             }
             if(jsonObject.has("brands")) {
                 JSONArray jArr = (JSONArray) jsonObject.get("brands");
@@ -40,6 +54,7 @@ public class RemoteTraining {
                     JSONObject b = (JSONObject) jArr.get(i);
                     String brandname = b.getString("brandname");
                     String url = b.getString("url");
+
                     String class_path = URL_CLASS + b.getString("classifier");
                     List<String> img_path = new ArrayList<>();
                     JSONArray imgs = (JSONArray) b.get("images");
@@ -47,7 +62,7 @@ public class RemoteTraining {
                         img_path.add(String.valueOf(imgs.get(j)));
                     }
 
-                    Brand brand = new Brand(brandname, url, class_path, img_path);
+                    Brand brand = new Brand(brandname.replace(" ", ""), url, class_path, img_path);
                     brands.add(brand);
                 }
             }
@@ -56,6 +71,8 @@ public class RemoteTraining {
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

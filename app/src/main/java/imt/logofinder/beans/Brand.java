@@ -1,5 +1,10 @@
 package imt.logofinder.beans;
 
+import android.os.Environment;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -25,9 +30,20 @@ public class Brand {
         HttpRequest class_req = new HttpRequest();
         try {
             this.classifier = class_req.execute(classifier).get();
+            File dictioFolder = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers");
+            if(!dictioFolder.exists()) dictioFolder.mkdirs();
+            File fVoc = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers/" + this.brandname + ".xml");
+            FileWriter fileWriter = new FileWriter(fVoc);
+            fileWriter.write(this.classifier);
+            fileWriter.close();
+
+            this.classifier = Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers/" + this.brandname + ".xml";
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

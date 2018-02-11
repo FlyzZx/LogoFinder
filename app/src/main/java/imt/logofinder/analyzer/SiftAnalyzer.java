@@ -3,11 +3,15 @@ package imt.logofinder.analyzer;
 import android.content.Context;
 import android.os.Environment;
 
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
+import org.bytedeco.javacpp.indexer.UByteBufferIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
 import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacpp.opencv_features2d.BFMatcher;
+import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_xfeatures2d;
 
 import java.io.File;
@@ -24,6 +28,8 @@ import static org.bytedeco.javacpp.opencv_calib3d.RANSAC;
 import static org.bytedeco.javacpp.opencv_calib3d.findHomography;
 import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
 import static org.bytedeco.javacpp.opencv_core.CV_64FC1;
+import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
+import static org.bytedeco.javacpp.opencv_core.KMEANS_PP_CENTERS;
 import static org.bytedeco.javacpp.opencv_core.perspectiveTransform;
 import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
 import static org.bytedeco.javacpp.opencv_imgcodecs.*;
@@ -47,12 +53,19 @@ public class SiftAnalyzer {
 
 
     private Mat image_scn = null;
-    private Map<String, Map<String, Float>> refLogos = null;
+    private Mat vocabulary = null;
 
     private Context context;
+    private RemoteTraining dictionnary;
+    private SIFT detector;
+    private opencv_features2d.FlannBasedMatcher matcher;
+    private opencv_features2d.BOWImgDescriptorExtractor bowide;
+    private opencv_ml.SVM[] classifiers;
+
+
 
     public SiftAnalyzer(Context context, String image_scn) throws Exception {
-        if (image_scn.isEmpty()) {
+       if (image_scn.isEmpty()) {
             throw new Exception("Fichier d'entrée incorrect");
         }
 
@@ -63,154 +76,75 @@ public class SiftAnalyzer {
     }
 
     /**
-     * Fonction d'initialisation des images de reférence vers des Mat OpenCV
+     * Fonction d'initialisation des images de reférence vers des descripteurs OpenCV
+     *  // TODO: 16/01/2018 A modifier pour enlever le déprecated CvMat
      */
-    public void initialize() {
-        refLogos = new HashMap<>();
+    private void initialize() {
 
-        File dir = Environment.getExternalStorageDirectory();
-        String dbPath = dir.getPath() + this.DB_PATH;
-        File dbDirectory = new File(dbPath);
+        dictionnary = new RemoteTraining();
 
-        File[] logos = dbDirectory.listFiles();
-        for (File f : logos) {
-            String name = f.getName();
-            Map<String, Float> logoData = new HashMap<>();
-            for (File lo : f.listFiles()) {
-                logoData.put(lo.getAbsolutePath(), 0f);
-            }
-            refLogos.put(name, logoData);
-            //refLogos.put(f.getAbsolutePath(), 0f);
+        //Chargement du vocabulaire
+        Loader.load(opencv_core.class);
+        opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(dictionnary.getVocabulary(), null, opencv_core.CV_STORAGE_READ);
+        Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList());
+        opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
+        vocabulary = new opencv_core.Mat(cvMat);
+        opencv_core.cvReleaseFileStorage(storage);
+
+        this.detector = SIFT.create(this.nFeatures, this.nOctaveLayer, this.contrastThreshold, this.edgeThreshold, this.sigma);
+        this.matcher = new opencv_features2d.FlannBasedMatcher();
+        this.bowide = new opencv_features2d.BOWImgDescriptorExtractor(detector, matcher);
+        this.bowide.setVocabulary(this.vocabulary);
+
+        classifiers = new opencv_ml.SVM[dictionnary.getBrands().size()];
+        for (int i = 0 ; i < dictionnary.getBrands().size() ; i++) {
+
+            //open the file to write the resultant descriptor
+            classifiers[i] = opencv_ml.SVM.create();
+            classifiers[i] = opencv_ml.SVM.load(dictionnary.getBrands().get(i).getClassifier());
+            System.out.println("Ok. Creating class name from ");
+
         }
     }
 
     /**
      * Analyse l'image et renvois le chemin vers l'image de référence, ou une chaine vide si non trouvé
+     * // TODO: 09/01/2018 Utilisation du RemoteTraining pour BOW 
      */
     public String analyze() {
-        float bMatch = 100000f; //Très grande distance
-        String retour = "";
-        for (String classes : refLogos.keySet()) {
-            for (String logopath : refLogos.get(classes).keySet()) {
-                Mat logo = imread(logopath);
-                resize(logo, logo, new Size(400, 400));
+        Mat response_hist = new Mat(); //Histogramme de sortie
+        KeyPointVector keypoints = new KeyPointVector(); //Keypoints de l'image d'entrée
+        Mat inputDescriptors = new Mat(); //Descripteur de l'image d'entrée
+        detector.detectAndCompute(image_scn, new Mat(), keypoints, inputDescriptors); //Detecte les keypoint et les descripteurs de l'image d'entrée
+        //detector.detect(image_scn, keypoints, new Mat());
+        bowide.compute(image_scn, keypoints, response_hist); //Calcul de la distance par rapport aux données présentes dans le dictionnaire BOW
 
-                SIFT sift = SIFT.create(nFeatures, nOctaveLayer, contrastThreshold, edgeThreshold, sigma);
-                KeyPointVector keys_img = new KeyPointVector();
-                KeyPointVector keys_logo = new KeyPointVector();
-                Mat desc_img = new Mat();
-                Mat desc_logo = new Mat();
-                sift.detectAndCompute(image_scn, new Mat(), keys_img, desc_img);
-                sift.detectAndCompute(logo, new Mat(), keys_logo, desc_logo);
+        //Recherche du meilleur match
+        float minF = Float.MAX_VALUE;
+        String bestMatch = null;
 
-                BFMatcher matcher = new BFMatcher();
-                DMatchVector matches = new DMatchVector();
-                matcher.match(desc_img, desc_logo, matches);
-                //matcher.knnMatch(desc_img, desc_logo, matches, 2);
+        long timePrediction = System.currentTimeMillis();
 
-                //Récupération des meilleurs matchs
-                DMatchVector goodMatchs = new DMatchVector();
-                FloatRawIndexer idx = desc_img.createIndexer();
+        for(int i = 0; i < classifiers.length; i++) {
+            Mat outputMatPredict = new Mat();
 
-                DMatch[] arrDm;
-                int idxTab = 0, sizeTab = 0;
+            float res = classifiers[i].predict(response_hist, outputMatPredict, 1);
+            FloatRawIndexer indexer = outputMatPredict.createIndexer();
 
-                for (int i = 0; i < idx.rows(); i++) {
-                    if (sizeTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        sizeTab++;
-                    }
-                }
-                arrDm = new DMatch[sizeTab];
+            if(outputMatPredict.cols() > 0 && outputMatPredict.rows() > 0) {
+                res = indexer.get(0, 0); //Récupération de la valeur dans la MAT
+            }
 
-                for (int i = 0; i < idx.rows(); i++) {
-                    if (idxTab < 25 && (matches.get(i).distance() < matchRatio * matches.get(i + 1).distance())) {
-                        arrDm[idxTab] = matches.get(i);
-                        idxTab++;
-                    }
-                }
-                goodMatchs.put(arrDm);
-
-                float d = moyenneDistance(arrDm);
-                refLogos.get(classes).put(logopath, d);
+            if(res < minF) {
+                minF = res;
+                bestMatch = dictionnary.getBrands().get(i).getBrandname();
             }
         }
-        //Récupération du meilleur match
-        //Map<String, Float> moyClasses = new HashMap<>();
-        /*for(String classes : refLogos.keySet()) {
-            Float moy = 0f;
-            for(String logo : refLogos.get(classes).keySet()) {
-                moy += refLogos.get(classes).get(logo);
-            }
-            //moyClasses.put(classes, );
-            moy = moy / refLogos.get(classes).size();
-            if (bMatch > moy) {
-                bMatch = moy;
-                retour = refLogos.get(classes).keySet().iterator().next();
-            }
-        }
-        */
-        Map<String , Float> tri = new HashMap<>();
+        timePrediction = System.currentTimeMillis() - timePrediction;
 
-        for(String classes : refLogos.keySet()) {
-            for(String logo : refLogos.get(classes).keySet()){
-
-                if(tri.values().size() < 3 ){
-                    tri.put(logo,refLogos.get(classes).get(logo));
-                }
-                else{
-                    Float temp = 0f;
-                    String tempStr ="";
-                    for(String cle : tri.keySet()){
-                        if(tri.get(cle) > temp ){
-                            temp = tri.get(cle);
-                            tempStr = cle;
-                        }
-                    }//on determine la plus grande valeur dans notre liste
-                    if(refLogos.get(classes).get(logo) < temp ){
-                        tri.remove(tempStr);
-                        tri.put(logo,refLogos.get(classes).get(logo));
-                    }
-                }
-
-
-            }
-
-        }
-
-        //On as les 3 plus petites distances dans tri
-        int compteur=0 ;
-
-        for(String classes : refLogos.keySet()){
-            int cnt = 0;
-            for(String k : tri.keySet()){
-               if(refLogos.get(classes).containsKey(k)){
-
-                   cnt++;
-
-               }
-            }
-            if(cnt > compteur){
-                compteur = cnt;
-                retour = refLogos.get(classes).keySet().iterator().next();
-                //retour est égal à la première image de la classe qui possède le plus d'images dans le top 3 des images avec les plus petites distances
-            }
-        }
-        if(compteur == 1){//Il n'y a pas deux images d'une même classe dans les 3 plus petites distances
-            Float temp = 10000f;
-            String tempStr = "";
-            for(String cle : tri.keySet()){
-                if(tri.get(cle) < temp ){
-                    temp = tri.get(cle);
-                    tempStr = cle;
-                }
-            }//on determine la distance la plus petite
-            retour = tempStr;
-
-        }
-
-
-
-        return retour;
+        if(bestMatch != null) {
+            return bestMatch + " in " + timePrediction + " ms";
+        } else return "";
     }
 
 
