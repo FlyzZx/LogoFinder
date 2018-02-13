@@ -45,15 +45,17 @@ public class LogoFinder {
 	private String classifierDir = "";
 	private JSONObject indexJson = null;
 
+	private ArrayList<String> classPath = null;
+
 
 	public LogoFinder() {
 		this.rootDir = null;
-
+		this.classPath = new ArrayList<>();
 	}
 
 	public LogoFinder(String rootDirPath) {
 		this.rootDir = new File(rootDirPath);
-
+		this.classPath = new ArrayList<>();
 	}
 
 	private Mat buildVocabulary() {
@@ -195,10 +197,13 @@ public class LogoFinder {
 		}
 
 		//Chargement des classifieurs en m�moire
-		ArrayList<String> classPath = new ArrayList<>();
+
 		File classiLocation = new File(this.classifierDir);
 		for(File classiFile : classiLocation.listFiles()) {
-			classPath.add(classiFile.getAbsolutePath());
+			if(!(classPath.contains(classiFile))){
+				classPath.add(classiFile.getAbsolutePath());
+			}
+
 		}
 
 		//Chargement du vocabulaire en m�moire

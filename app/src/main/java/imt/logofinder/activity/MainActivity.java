@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Bitmap image;
 
     private ServerTraining servertest;
+    private LogoFinder logoFinder;
 
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
@@ -106,6 +107,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
+        //Création du composant LogoFinder
+        this.logoFinder = new LogoFinder();
+        logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
+        logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
     }
 
     @Override
@@ -129,9 +134,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
-                    LogoFinder logoFinder = new LogoFinder();
-                    logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
-                    logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
                     String outPath = logoFinder.predict(this.tempPath);
                     this.outPath = outPath;
                     if (this.outPath.equals("")) {
