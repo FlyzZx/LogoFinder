@@ -84,6 +84,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         /*
+        Récupération des fichiers sur le serveur distant
+         */
+        this.servertest = new ServerTraining();
+
+
+        /*
         Initialisation des composants
          */
 
@@ -123,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
-
-                    this.servertest = new ServerTraining();
                     LogoFinder logoFinder = new LogoFinder();
                     logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
                     logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
