@@ -77,10 +77,10 @@
 
     <Button
         android:id="@+id/btn_analyze"
-        android:layout_width="346dp"
+        android:layout_width="300dp"
         android:layout_height="49dp"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="64dp"
         android:layout_marginStart="8dp"
         android:text="@string/btn_analyze"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -118,5 +118,17 @@
         app:layout_constraintGuide_percent="0.12"
         tools:layout_editor_absoluteY="62dp"
         tools:layout_editor_absoluteX="0dp" />
+
+    <Button
+        android:id="@+id/btn_options"
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/btn_options"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_analyze" />
 
 </android.support.constraint.ConstraintLayout>
