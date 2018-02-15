@@ -35,6 +35,9 @@ public class ServerTraining {
         Classifiers = new ArrayList<>();
         brands = new ArrayList<>();
         remoteIndex();
+        //Peut-être mettre la version des fichiers dans l'index ?
+
+
         remoteVocabulary();
         remoteClassifiers();
     }
