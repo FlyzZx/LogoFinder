@@ -99,6 +99,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Bouton analyse de l'image
         this.btn_analyze = (Button) findViewById(R.id.btn_analyze);
         this.btn_analyze.setOnClickListener(this);
+        //Bouton Options
+        this.btn_options = (Button) findViewById(R.id.btn_options);
+        this.btn_options.setOnClickListener(this);
+
 
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
@@ -141,6 +145,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+            case R.id.btn_options:
+
                 break;
             default:
                 break;
