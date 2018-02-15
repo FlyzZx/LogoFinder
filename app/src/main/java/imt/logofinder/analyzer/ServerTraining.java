@@ -36,10 +36,22 @@ public class ServerTraining {
         brands = new ArrayList<>();
         remoteIndex();
         //Peut-être mettre la version des fichiers dans l'index ?
+        if(isDownloadNeeded()){
+
+            File logoFinderDir = new File(Environment.getExternalStorageDirectory(),"/LogoFinder");
+            if(logoFinderDir.exists()) logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
+            remoteVocabulary();
+            remoteClassifiers();
+        }
 
 
-        remoteVocabulary();
-        remoteClassifiers();
+
+
+    }
+
+    private boolean isDownloadNeeded() {
+        //implémenter le test de version de fichiers.
+        return true;
     }
 
     public ServerTraining(String root ){
