@@ -54,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
     private Button btn_analyze = null;
+    private Button btn_options = null;
+
+
     private ImageView imageView_main = null;
 
     @Override
