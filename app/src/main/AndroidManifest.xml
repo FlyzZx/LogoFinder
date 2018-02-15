@@ -38,6 +38,7 @@
         </provider>
 
         <activity android:name=".activity.SecretDebugActivity"></activity>
+        <activity android:name=".activity.OptionsActivity" android:parentActivityName=".activity.MainActivity"></activity>
     </application>
 
 </manifest>

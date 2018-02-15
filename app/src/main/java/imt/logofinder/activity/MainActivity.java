@@ -147,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.btn_options:
-
+                Intent optionsIntent = new Intent(this,OptionsActivity.class);
+                startActivity(optionsIntent);
                 break;
             default:
                 break;
