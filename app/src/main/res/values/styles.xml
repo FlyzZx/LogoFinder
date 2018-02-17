@@ -6,6 +6,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionBarStyle">@style/ActionNoShadow</item>
     </style>
 
+    <style name="ActionNoShadow" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:elevation">0dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="ButtonAppImt" parent="android:Widget.Material.Button">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/shape_button_imt</item>
+    </style>
 </resources>
