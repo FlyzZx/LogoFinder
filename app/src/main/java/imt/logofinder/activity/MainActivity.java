@@ -99,7 +99,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
         //Récupération du vocabulaire
-        this.servertest = new ServerTraining();
+        //TODO ASYNCTASK
+        this.servertest = new ServerTraining("http://imtimagemobile.000webhostapp.com/");
     }
 
     @Override

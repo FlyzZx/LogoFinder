@@ -24,12 +24,12 @@ import imt.logofinder.http.HttpRequest;
 
 public class ServerTraining {
     private static final String TAG = "SERVER_TRAINING";
-    private String Root = "http://imtimagemobile.000webhostapp.com/";
+    private String Root = "";
     private String Vocabulaire = null;
     private List<String> Classifiers = null;
     private List<Brand> brands = null;
 
-    public ServerTraining() {
+    public void getRemoteFiles() {
         Classifiers = new ArrayList<>();
         brands = new ArrayList<>();
 
@@ -74,6 +74,7 @@ public class ServerTraining {
 
     public ServerTraining(String root) {
         this.Root = root;
+        getRemoteFiles();
     }
 
     private void remoteIndex() {
