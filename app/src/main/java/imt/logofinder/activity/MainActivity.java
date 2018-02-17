@@ -35,9 +35,7 @@ import java.io.OutputStream;
 
 import imt.logofinder.R;
 import imt.logofinder.analyzer.LogoFinder;
-import imt.logofinder.analyzer.RemoteTraining;
 import imt.logofinder.analyzer.ServerTraining;
-import imt.logofinder.analyzer.SiftAnalyzer;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -58,9 +56,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode) {
+        switch (requestCode) {
             case RETURN_PERM:
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 } else {
                     this.finish();
@@ -80,15 +78,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET}, RETURN_PERM);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET}, RETURN_PERM);
         }
 
         /*
         Initialisation des composants
          */
 
-            //Bouton prise de photo
-            this.btn_takePic = (Button) findViewById(R.id.btn_takePic);
+        //Bouton prise de photo
+        this.btn_takePic = (Button) findViewById(R.id.btn_takePic);
         this.btn_takePic.setOnClickListener(this);
         //Bouton récupération depuis gallerie
         this.btn_choosePic = (Button) findViewById(R.id.btn_choosePic);
@@ -100,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
+        //Récupération du vocabulaire
+        this.servertest = new ServerTraining();
     }
 
     @Override
@@ -123,8 +123,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
             case R.id.btn_analyze:
                 try {
-
-                    this.servertest = new ServerTraining();
                     LogoFinder logoFinder = new LogoFinder();
                     logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
                     logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
