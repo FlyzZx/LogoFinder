@@ -3,7 +3,6 @@ package imt.logofinder.analyzer;
 import android.os.Environment;
 import android.util.Log;
 
-import org.bytedeco.javacpp.opencv_features2d;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,10 +77,12 @@ public class ServerTraining {
     }
 
     private void remoteIndex() {
+        File dicoFolder = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
+        if (!dicoFolder.exists()) dicoFolder.mkdirs();//Si le dossier n'existe pas on le crée
         try {
-
             HttpRequest index = new HttpRequest();
             String data = index.execute(Root + "index.json").get();
+
             File indexJson = new File(Environment.getExternalStorageDirectory() + "/LogoFinder/index.json");
             FileWriter indexWriter = new FileWriter(indexJson);
             indexWriter.write(data);
@@ -89,13 +90,15 @@ public class ServerTraining {
 
             JSONObject jsonObject = new JSONObject(data);
             if (jsonObject.has("vocabulaire")) {
-                this.Vocabulaire = jsonObject.getJSONArray("vocabulaire").getString(0);
-
+                this.Vocabulaire = jsonObject.getString("vocabulaire");
             }
-            if (jsonObject.has("classifiers")) {
-                JSONArray jsonArray = jsonObject.getJSONArray("classifiers").getJSONArray(0);
+            if (jsonObject.has("brands")) {
+                JSONArray jsonArray = jsonObject.getJSONArray("brands");
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    this.Classifiers.add(jsonArray.getString(i));
+                    JSONObject objTmp = new JSONObject();
+                    if(objTmp.has("classifier")) {
+                        this.Classifiers.add("Classifiers/" + objTmp.getString("classifier"));
+                    }
                 }
             }
 
@@ -131,6 +134,8 @@ public class ServerTraining {
     }
 
     private void remoteClassifiers() {
+        File classifierDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers");
+        if (!classifierDir.exists()) classifierDir.mkdirs();//Si le dossier n'
         for (String classifier : this.Classifiers) {
             String filename = classifier.substring(classifier.lastIndexOf('/') + 1);
             String className = filename.replace(".xml", "");
