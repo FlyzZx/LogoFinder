@@ -66,7 +66,7 @@ public class ServerTraining {
                     }
                 }
             } catch (IOException | JSONException | InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                return false;
             }
         }
         return true;
