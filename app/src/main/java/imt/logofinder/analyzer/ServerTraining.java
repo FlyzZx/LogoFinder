@@ -139,6 +139,4 @@ public class ServerTraining {
             brands.add(brand);
         }
     }
-
-
 }
