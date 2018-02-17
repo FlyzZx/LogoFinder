@@ -3,6 +3,7 @@ package imt.logofinder.analyzer;
 import android.os.Environment;
 import android.util.Log;
 
+import org.bytedeco.javacpp.opencv_features2d;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,8 +44,6 @@ public class ServerTraining {
             remoteVocabulary();
             remoteClassifiers();
         }
-
-
     }
 
     private boolean isDownloadNeeded() {
