@@ -10,6 +10,7 @@ import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacpp.opencv_features2d.BOWImgDescriptorExtractor;
 import org.bytedeco.javacpp.opencv_features2d.BOWKMeansTrainer;
 import org.bytedeco.javacpp.opencv_imgcodecs;
+import org.bytedeco.javacpp.opencv_imgproc;
 import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_ml.SVM;
 import org.bytedeco.javacpp.opencv_xfeatures2d.SIFT;
@@ -253,56 +254,62 @@ public class LogoFinder {
 
     public String predict(String filePath) {
         //On vérifie l'existence du vocabulaire
-        if (vocabulary == null) {
-            buildVocabulary();
-        }
-
-        //Chargement des classifieurs en m�moire
-        ArrayList<String> classPath = new ArrayList<>();
-        File classiLocation = new File(this.classifierDir);
-        for (File classiFile : classiLocation.listFiles()) {
-            classPath.add(classiFile.getAbsolutePath());
-        }
-
-        //Chargement du vocabulaire en m�moire
-        SIFT sift = SIFT.create(nFeatures, nOctaveLayers, contrastThreshold, edgeThreshold, sigma);
-        BOWImgDescriptorExtractor extractor = new BOWImgDescriptorExtractor(sift, new opencv_features2d.FlannBasedMatcher());
-        extractor.setVocabulary(this.vocabulary);
-
-        //Pr�diction
-        System.out.println("Predicting file " + filePath);
-        Mat testImg = opencv_imgcodecs.imread(filePath, opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-        Mat descriptor = new Mat();
-        KeyPointVector keypoints = new KeyPointVector();
-
-        System.out.println("Detecting features");
-        sift.detect(testImg, keypoints);
-        System.out.println("Calculate words frequencies's histogram");
-        Mat histo = new Mat();
-        extractor.compute(testImg, keypoints, histo, new opencv_core.IntVectorVector(), new Mat());
+        File voc = new File(this.vocabularyDir + "/vocab.yml");
+        if (voc.exists()) {
+            FileStorage loader = new FileStorage(voc.getAbsolutePath(), FileStorage.READ);
+            this.vocabulary = loader.get("vocabulary").mat();
+            loader.close();
 
 
-        float minF = Float.MAX_VALUE;
-        String bestMatch = null;
-        for (String classP : classPath) {
-            SVM svm = SVM.create();
-            svm = SVM.load(classP);
-            Mat retM = new Mat();
-            float ret = svm.predict(histo, retM, 1);
-
-            FloatRawIndexer indexer = retM.createIndexer();
-            if (retM.cols() > 0 && retM.rows() > 0) {
-                ret = indexer.get(0, 0); //R�cup�ration de la valeur dans la MAT
+            //Chargement des classifieurs en m�moire
+            ArrayList<String> classPath = new ArrayList<>();
+            File classiLocation = new File(this.classifierDir);
+            for (File classiFile : classiLocation.listFiles()) {
+                classPath.add(classiFile.getAbsolutePath());
             }
-            if (ret < minF) {
-                minF = ret;
-                bestMatch = classP;
-            }
-            System.out.println("Prediction for class " + classP + " : " + ret);
-        }
 
-        System.out.println("Prediction for file " + filePath + " is " + bestMatch + " : " + minF);
-        return bestMatch;
+            //Chargement du vocabulaire en m�moire
+            SIFT sift = SIFT.create(nFeatures, nOctaveLayers, contrastThreshold, edgeThreshold, sigma);
+            BOWImgDescriptorExtractor extractor = new BOWImgDescriptorExtractor(sift, new opencv_features2d.FlannBasedMatcher());
+            extractor.setVocabulary(this.vocabulary);
+
+            //Pr�diction
+            System.out.println("Predicting file " + filePath);
+            Mat testImg = opencv_imgcodecs.imread(filePath, opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+            opencv_imgproc.resize(testImg, testImg, new opencv_core.Size(500, 700));
+            Mat descriptor = new Mat();
+            KeyPointVector keypoints = new KeyPointVector();
+
+            System.out.println("Detecting features");
+            sift.detect(testImg, keypoints);
+            System.out.println("Calculate words frequencies's histogram");
+            Mat histo = new Mat();
+            extractor.compute(testImg, keypoints, histo, new opencv_core.IntVectorVector(), new Mat());
+
+
+            float minF = Float.MAX_VALUE;
+            String bestMatch = null;
+            for (String classP : classPath) {
+                SVM svm = SVM.create();
+                svm = SVM.load(classP);
+                Mat retM = new Mat();
+                float ret = svm.predict(histo, retM, 1);
+
+                FloatRawIndexer indexer = retM.createIndexer();
+                if (retM.cols() > 0 && retM.rows() > 0) {
+                    ret = indexer.get(0, 0); //R�cup�ration de la valeur dans la MAT
+                }
+                if (ret < minF) {
+                    minF = ret;
+                    bestMatch = classP;
+                }
+                System.out.println("Prediction for class " + classP + " : " + ret);
+            }
+
+            System.out.println("Prediction for file " + filePath + " is " + bestMatch + " : " + minF);
+            return bestMatch;
+        }
+        return "";
     }
 
     public File getRootDir() {

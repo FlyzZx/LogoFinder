@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class ServerTraining {
                         return false;
                     }
                 }
-            } catch (IOException | JSONException | InterruptedException | ExecutionException e) {
+            } catch (JSONException | InterruptedException | ExecutionException | IOException e) {
                 return false;
             }
         }
@@ -74,7 +75,7 @@ public class ServerTraining {
 
     public ServerTraining(String root) {
         this.Root = root;
-        getRemoteFiles();
+        //getRemoteFiles();
     }
 
     private void remoteIndex() {
@@ -120,7 +121,7 @@ public class ServerTraining {
             String data = vocab.execute(Root + Vocabulaire).get();
             File dicoFolder = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
             if (!dicoFolder.exists()) dicoFolder.mkdirs();//Si le dossier n'existe pas on le crée
-            File fvoc = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/vocabulary.yml");
+            File fvoc = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/vocab.yml");
             FileWriter fileWriter = new FileWriter(fvoc);
             fileWriter.write(data);
             fileWriter.close();

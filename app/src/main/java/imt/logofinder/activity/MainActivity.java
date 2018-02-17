@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String outPath = logoFinder.predict(this.tempPath);
                     this.outPath = outPath;
                     if (this.outPath.equals("")) {
-                        Toast.makeText(this, "Match Not Found", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Vocabulaire non detecté !", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(this, this.outPath, Toast.LENGTH_LONG).show();
                     }
