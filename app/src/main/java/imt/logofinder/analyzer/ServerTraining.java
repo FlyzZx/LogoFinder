@@ -56,12 +56,12 @@ public class ServerTraining {
                 fr.close();
                 JSONObject jObj = new JSONObject(new String(bDatas));
                 if (jObj.has("vocab_hash")) {
-                    String currentHash = jObj.getJSONArray("vocab_hash").getString(0);
+                    String currentHash = jObj.getString("vocab_hash");
                     //On récupère le hash distant
                     HttpRequest hashRequest = new HttpRequest();
                     String data = hashRequest.execute(Root + "index.json").get();
                     JSONObject newData = new JSONObject(data);
-                    String newHash = newData.getJSONArray("vocab_hash").getString(0);
+                    String newHash = newData.getString("vocab_hash");
                     if (newData.has("vocab_hash") && newHash.equals(currentHash)) {
                         return false;
                     }
@@ -97,7 +97,7 @@ public class ServerTraining {
             if (jsonObject.has("brands")) {
                 JSONArray jsonArray = jsonObject.getJSONArray("brands");
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject objTmp = new JSONObject();
+                    JSONObject objTmp = jsonArray.getJSONObject(i);
                     if(objTmp.has("classifier")) {
                         this.Classifiers.add("Classifiers/" + objTmp.getString("classifier"));
                     }

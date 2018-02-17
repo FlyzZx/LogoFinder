@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Récupération du vocabulaire
         //TODO ASYNCTASK
         this.servertest = new ServerTraining("http://imtimagemobile.000webhostapp.com/");
+        this.servertest.getRemoteFiles();
     }
 
     @Override
