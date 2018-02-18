@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -34,24 +36,53 @@ public class ServerTraining {
     private String Vocabulaire = null;
     private List<String> Classifiers = null;
     private List<Brand> brands = null;
+    private Activity activityParent = null;
+    private PendingDownloadDialog pendingDownloadDialog;
+
+    private class MyAsyncTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            if (isDownloadNeeded()) {
+                Log.d(TAG, "Téléchargement des fichiers...");
+
+                File logoFinderDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
+                if (logoFinderDir.exists())
+                    logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
+                //pendingDialog.getTextViewStatus().setText("Récupération de l'index");
+                remoteIndex();
+                // pendingDialog.getTextViewStatus().setText("Récupération du vocabulaire");
+                remoteVocabulary();
+                //pendingDialog.getTextViewStatus().setText("Récupération des classes");
+                remoteClassifiers();
+            }
+
+            return 1;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pendingDownloadDialog = new PendingDownloadDialog();
+            pendingDownloadDialog.setCancelable(false);
+            pendingDownloadDialog.show(activityParent.getFragmentManager(), "DL");
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            pendingDownloadDialog.dismiss();
+        }
+    }
 
     public void getRemoteFiles() {
         Classifiers = new ArrayList<>();
         brands = new ArrayList<>();
 
-        //pendingDialog.getTextViewStatus().setText("Vérification de la version des fichiers..");
-        if (isDownloadNeeded()) {
-            Log.d(TAG, "Téléchargement des fichiers...");
-
-            File logoFinderDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
-            if (logoFinderDir.exists())
-                logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
-            //pendingDialog.getTextViewStatus().setText("Récupération de l'index");
-            remoteIndex();
-           // pendingDialog.getTextViewStatus().setText("Récupération du vocabulaire");
-            remoteVocabulary();
-            //pendingDialog.getTextViewStatus().setText("Récupération des classes");
-            remoteClassifiers();
+        MyAsyncTask sync = new MyAsyncTask();
+        if(Build.VERSION.SDK_INT >= 11/*HONEYCOMB*/) {
+            sync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this.Root);
+        } else {
+            sync.execute(this.Root);
         }
     }
 
@@ -86,9 +117,9 @@ public class ServerTraining {
         return true;
     }
 
-    public ServerTraining(String root) {
+    public ServerTraining(String root, Activity parent) {
         this.Root = root;
-
+        this.activityParent = parent;
         //getRemoteFiles();
     }
 

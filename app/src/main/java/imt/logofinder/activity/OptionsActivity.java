@@ -82,12 +82,8 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         sp.edit().putString("choosenServer", serverOptions.getServerPath()).commit();
 
 
-        ServerTraining serverTraining = new ServerTraining(serverOptions.getServerPath());
-        PendingDownloadDialog pendingDownloadDialog = new PendingDownloadDialog();
-        pendingDownloadDialog.setCancelable(false);
-        pendingDownloadDialog.show(getFragmentManager(), "DL");
+        ServerTraining serverTraining = new ServerTraining(serverOptions.getServerPath(), this);
         serverTraining.getRemoteFiles();
-        pendingDownloadDialog.dismiss();
     }
 
     @Override

@@ -127,16 +127,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
         //Récupération du vocabulaire
-        //TODO ASYNCTASK
         SharedPreferences sp = getSharedPreferences("logo", MODE_PRIVATE);
         String srv = sp.getString("choosenServer", "");
         if(!srv.equals("")) {
-            this.servertest = new ServerTraining(srv);
-            PendingDownloadDialog pendingDownloadDialog = new PendingDownloadDialog();
-            pendingDownloadDialog.setCancelable(false);
-            pendingDownloadDialog.show(getFragmentManager(), "DL");
+            this.servertest = new ServerTraining(srv, this);
             this.servertest.getRemoteFiles();
-            pendingDownloadDialog.dismiss();
         }
     }
 
