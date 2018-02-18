@@ -1,35 +1,34 @@
 package imt.logofinder.activity;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.security.AccessController;
 import java.util.ArrayList;
-import java.util.List;
 
+import imt.logofinder.Model.ServerOptionAdapter;
+import imt.logofinder.Model.ServerOptions;
 import imt.logofinder.R;
-import imt.logofinder.sql.DbSchema;
-
-import static imt.logofinder.sql.DbSchema.*;
+import imt.logofinder.fragment.AddServerDialogFragment;
+import imt.logofinder.sql.dao.ServerDao;
 
 /**
  * Created by TOM on 15/02/2018.
  */
 
-public class OptionsActivity extends AppCompatActivity implements OnItemSelectedListener {
+public class OptionsActivity extends AppCompatActivity implements OnItemSelectedListener, View.OnClickListener, AddServerDialogFragment.CreateServerListener {
     private TextView textView_chemin_serveur = null;
     private Spinner spinner_ddl_servers = null;
-    private DbHelper dbHelper = null;
+
+    private FloatingActionButton btn_add_server = null;
+    ServerDao serverDao = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,67 +37,70 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         //Instanciation des Composants
         this.textView_chemin_serveur = (TextView) findViewById(R.id.textView_chemin_serveur);
         this.spinner_ddl_servers = (Spinner) findViewById(R.id.spinner_ddl_servers);
-
+        this.btn_add_server = (FloatingActionButton) findViewById(R.id.btn_add_server);
 
         //Instanciation du helper SQLite pour la DAL
-         dbHelper = new DbHelper(getApplicationContext());
 
-
-
+        serverDao = new ServerDao(getApplicationContext());
 
 
         //Listeners
         this.spinner_ddl_servers.setOnItemSelectedListener(this);
-
+        this.btn_add_server.setOnClickListener(this);
 
         fillDropDownList();
 
     }
 
-    private void fillDropDownList(){
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
-                TableOption._ID,
-                TableOption.NOM_COLONNE_SERVERNAME,
-        };
+    private void fillDropDownList() {
+        serverDao.open();
+        ArrayList<ServerOptions> serverItems = serverDao.selectAll();
+        serverDao.close();
 
-        Cursor cursor = db.query(TableOption.NOM_TABLE,projection,null,null,null,null,null);
-        List serverItems = new ArrayList<>();
-        while(cursor.moveToNext()){
-            String serverItem = cursor.getString(cursor.getColumnIndex(TableOption.NOM_COLONNE_SERVERNAME));
-            serverItems.add(serverItem);
-        }
-        cursor.close();
-
-        ArrayAdapter<String> adapter = new  ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,serverItems);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.spinner_ddl_servers.setAdapter(adapter);
+        ServerOptionAdapter soa = new ServerOptionAdapter(this, serverItems);
+        spinner_ddl_servers.setAdapter(soa);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        String serverName = parent.getItemAtPosition(pos).toString();
-
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
-                TableOption._ID,
-                TableOption.NOM_COLONNE_SERVERNAME,
-                TableOption.NOM_COLONNE_SERVERPATH
-        };
-        String selection = TableOption.NOM_COLONNE_SERVERNAME + " = ?";
-        String[] selectionArgs = { serverName };
+        ServerOptions serverOptions = (ServerOptions) parent.getItemAtPosition(pos);
+        //Recupère le chemin du serveur selectionné
+        SharedPreferences sp = getSharedPreferences("logo", MODE_PRIVATE);
+        sp.edit().putString("choosenServer", serverOptions.getServerPath()).commit();
 
 
-        Cursor cursor = db.query(TableOption.NOM_TABLE,projection,selection,selectionArgs,null,null,null);
-        cursor.moveToFirst();
-        String path_serveur = cursor.getString(cursor.getColumnIndex(TableOption.NOM_COLONNE_SERVERPATH));
-
-        this.textView_chemin_serveur.setText(path_serveur);
+        //ServerTraining serverTraining = new ServerTraining(path_serveur);
 
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.btn_add_server:
+                AddServerDialogFragment fragment = new AddServerDialogFragment();
+                fragment.show(this.getFragmentManager(), "addServer");
+                fragment.setCreateServerListener(this);
+                break;
+            default:
+                break;
+
+
+        }
+
+
+    }
+
+    @Override
+    public void onServerCreation(String servername, String serverpath) {
+        serverDao.open();
+        serverDao.add(servername, serverpath, 1);
+        serverDao.close();
+        fillDropDownList();
     }
 }
