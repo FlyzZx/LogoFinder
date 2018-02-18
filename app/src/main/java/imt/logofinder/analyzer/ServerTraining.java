@@ -66,8 +66,10 @@ public class ServerTraining {
                         return false;
                     }
                 }
-            } catch (JSONException | InterruptedException | ExecutionException | IOException e) {
+            } catch (InterruptedException | ExecutionException | IOException e) {
                 return false;
+            } catch (JSONException jE) {
+                return true;
             }
         }
         return true;

@@ -3,6 +3,7 @@ package imt.logofinder.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -107,8 +108,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Récupération du vocabulaire
         //TODO ASYNCTASK
-        this.servertest = new ServerTraining("http://imtimagemobile.000webhostapp.com/");
-        this.servertest.getRemoteFiles();
+        SharedPreferences sp = getSharedPreferences("logo", MODE_PRIVATE);
+        String srv = sp.getString("choosenServer", "");
+        if(!srv.equals("")) {
+            this.servertest = new ServerTraining(srv);
+            this.servertest.getRemoteFiles();
+        }
     }
 
     @Override

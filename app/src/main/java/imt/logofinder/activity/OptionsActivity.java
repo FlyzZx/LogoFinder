@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import imt.logofinder.Model.ServerOptionAdapter;
 import imt.logofinder.Model.ServerOptions;
 import imt.logofinder.R;
+import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.fragment.AddServerDialogFragment;
 import imt.logofinder.sql.dao.ServerDao;
 
@@ -69,8 +70,8 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         sp.edit().putString("choosenServer", serverOptions.getServerPath()).commit();
 
 
-        //ServerTraining serverTraining = new ServerTraining(path_serveur);
-
+        ServerTraining serverTraining = new ServerTraining(serverOptions.getServerPath());
+        serverTraining.getRemoteFiles();
     }
 
     @Override
