@@ -101,7 +101,7 @@ public class ServerTraining {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject objTmp = jsonArray.getJSONObject(i);
                     if(objTmp.has("classifier")) {
-                        this.Classifiers.add("Classifiers/" + objTmp.getString("classifier"));
+                        this.Classifiers.add("classifiers/" + objTmp.getString("classifier"));
                     }
                 }
             }
@@ -138,7 +138,7 @@ public class ServerTraining {
     }
 
     private void remoteClassifiers() {
-        File classifierDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/Classifiers");
+        File classifierDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder/classifiers");
         if (!classifierDir.exists()) classifierDir.mkdirs();//Si le dossier n'
         for (String classifier : this.Classifiers) {
             String filename = classifier.substring(classifier.lastIndexOf('/') + 1);
