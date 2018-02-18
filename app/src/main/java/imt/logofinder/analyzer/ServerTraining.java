@@ -1,5 +1,9 @@
 package imt.logofinder.analyzer;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import imt.logofinder.beans.Brand;
+import imt.logofinder.fragment.PendingDownloadDialog;
 import imt.logofinder.http.HttpRequest;
 
 /**
@@ -34,17 +39,23 @@ public class ServerTraining {
         Classifiers = new ArrayList<>();
         brands = new ArrayList<>();
 
-        //Peut-être mettre la version des fichiers dans l'index ?
+        //pendingDialog.getTextViewStatus().setText("Vérification de la version des fichiers..");
         if (isDownloadNeeded()) {
             Log.d(TAG, "Téléchargement des fichiers...");
+
             File logoFinderDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
             if (logoFinderDir.exists())
                 logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
+            //pendingDialog.getTextViewStatus().setText("Récupération de l'index");
             remoteIndex();
+           // pendingDialog.getTextViewStatus().setText("Récupération du vocabulaire");
             remoteVocabulary();
+            //pendingDialog.getTextViewStatus().setText("Récupération des classes");
             remoteClassifiers();
         }
     }
+
+
 
     private boolean isDownloadNeeded() {
         File indexJsonFile = new File(Environment.getExternalStorageDirectory() + "/LogoFinder/index.json");
@@ -77,6 +88,7 @@ public class ServerTraining {
 
     public ServerTraining(String root) {
         this.Root = root;
+
         //getRemoteFiles();
     }
 

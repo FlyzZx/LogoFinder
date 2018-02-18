@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -17,6 +18,7 @@ import imt.logofinder.Model.ServerOptions;
 import imt.logofinder.R;
 import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.fragment.AddServerDialogFragment;
+import imt.logofinder.fragment.PendingDownloadDialog;
 import imt.logofinder.sql.dao.ServerDao;
 
 /**
@@ -27,7 +29,7 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
     private TextView textView_chemin_serveur = null;
     private Spinner spinner_ddl_servers = null;
 
-    private FloatingActionButton btn_add_server = null;
+    private Button btn_add_server = null;
     ServerDao serverDao = null;
 
     @Override
@@ -38,11 +40,21 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         //Instanciation des Composants
         this.textView_chemin_serveur = (TextView) findViewById(R.id.textView_chemin_serveur);
         this.spinner_ddl_servers = (Spinner) findViewById(R.id.spinner_ddl_servers);
-        this.btn_add_server = (FloatingActionButton) findViewById(R.id.btn_add_server);
+        this.btn_add_server = (Button) findViewById(R.id.btn_add_server);
 
         //Instanciation du helper SQLite pour la DAL
 
         serverDao = new ServerDao(getApplicationContext());
+        serverDao.open();
+        if(serverDao.selectAll().size() == 0) {
+            serverDao.add("Perso", "http://imtimagemobile.000webhostapp.com/", 1);
+        }
+        serverDao.close();
+
+        String actuelSrv = getSharedPreferences("logo", MODE_PRIVATE).getString("choosenServer", "");
+        if(!actuelSrv.equals("")) {
+            textView_chemin_serveur.setText(actuelSrv);
+        }
 
 
         //Listeners
@@ -71,7 +83,11 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
 
 
         ServerTraining serverTraining = new ServerTraining(serverOptions.getServerPath());
+        PendingDownloadDialog pendingDownloadDialog = new PendingDownloadDialog();
+        pendingDownloadDialog.setCancelable(false);
+        pendingDownloadDialog.show(getFragmentManager(), "DL");
         serverTraining.getRemoteFiles();
+        pendingDownloadDialog.dismiss();
     }
 
     @Override

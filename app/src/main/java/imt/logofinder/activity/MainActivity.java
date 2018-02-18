@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import imt.logofinder.R;
 import imt.logofinder.analyzer.LogoFinder;
 import imt.logofinder.analyzer.ServerTraining;
+import imt.logofinder.fragment.PendingDownloadDialog;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -131,7 +132,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String srv = sp.getString("choosenServer", "");
         if(!srv.equals("")) {
             this.servertest = new ServerTraining(srv);
+            PendingDownloadDialog pendingDownloadDialog = new PendingDownloadDialog();
+            pendingDownloadDialog.setCancelable(false);
+            pendingDownloadDialog.show(getFragmentManager(), "DL");
             this.servertest.getRemoteFiles();
+            pendingDownloadDialog.dismiss();
         }
     }
 
