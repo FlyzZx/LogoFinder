@@ -21,6 +21,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -72,6 +75,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.appbar_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btn_options:
+                Intent optionsIntent = new Intent(this,OptionsActivity.class);
+                startActivity(optionsIntent);
+                break;
+        }
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -98,9 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Bouton analyse de l'image
         this.btn_analyze = (Button) findViewById(R.id.btn_analyze);
         this.btn_analyze.setOnClickListener(this);
-        //Bouton Options
-        this.btn_options = (Button) findViewById(R.id.btn_options);
-        this.btn_options.setOnClickListener(this);
+
 
 
         //ImageView Main
@@ -150,10 +169,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                break;
-            case R.id.btn_options:
-                Intent optionsIntent = new Intent(this,OptionsActivity.class);
-                startActivity(optionsIntent);
                 break;
             default:
                 break;
