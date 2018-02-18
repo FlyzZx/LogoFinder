@@ -131,7 +131,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String srv = sp.getString("choosenServer", "");
         if(!srv.equals("")) {
             this.servertest = new ServerTraining(srv, this);
-            this.servertest.getRemoteFiles();
+            try {
+                this.servertest.getRemoteFiles();
+            } catch (Exception e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

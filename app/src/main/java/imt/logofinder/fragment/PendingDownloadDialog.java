@@ -24,7 +24,7 @@ public class PendingDownloadDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        final View layout = inflater.inflate(R.layout.layout_dialog_pending,null);
+        View layout = inflater.inflate(R.layout.layout_dialog_pending,null);
 
         textViewStatus = layout.findViewById(R.id.textView_frag_pending_status);
         textViewStatus.setText("Téléchargement...");

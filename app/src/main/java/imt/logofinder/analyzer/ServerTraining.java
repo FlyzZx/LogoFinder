@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import imt.logofinder.R;
 import imt.logofinder.beans.Brand;
 import imt.logofinder.fragment.PendingDownloadDialog;
 import imt.logofinder.http.HttpRequest;
@@ -38,26 +41,37 @@ public class ServerTraining {
     private List<Brand> brands = null;
     private Activity activityParent = null;
     private PendingDownloadDialog pendingDownloadDialog;
+    private TextView txtStatusDl = null;
 
-    private class MyAsyncTask extends AsyncTask<String, Void, Integer> {
+    private class MyAsyncTask extends AsyncTask<String, String, Integer> {
 
         @Override
         protected Integer doInBackground(String... strings) {
+            //txtStatusDl = pendingDownloadDialog.getTextViewStatus();
+            publishProgress("Vérification de l'index...");
             if (isDownloadNeeded()) {
                 Log.d(TAG, "Téléchargement des fichiers...");
-
                 File logoFinderDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
                 if (logoFinderDir.exists())
                     logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
-                //pendingDialog.getTextViewStatus().setText("Récupération de l'index");
+                publishProgress("Téléchargement de l'index...");
                 remoteIndex();
-                // pendingDialog.getTextViewStatus().setText("Récupération du vocabulaire");
+                publishProgress("Téléchargement du vocabulaire...");
                 remoteVocabulary();
-                //pendingDialog.getTextViewStatus().setText("Récupération des classes");
+                publishProgress("Téléchargement des classes...");
                 remoteClassifiers();
             }
 
             return 1;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+
+            if(txtStatusDl == null) {
+                txtStatusDl = pendingDownloadDialog.getTextViewStatus();
+            }
+            txtStatusDl.setText(values[0]);
         }
 
         @Override
@@ -74,16 +88,21 @@ public class ServerTraining {
         }
     }
 
-    public void getRemoteFiles() {
+    public void getRemoteFiles() throws Exception {
         Classifiers = new ArrayList<>();
         brands = new ArrayList<>();
 
-        MyAsyncTask sync = new MyAsyncTask();
-        if(Build.VERSION.SDK_INT >= 11/*HONEYCOMB*/) {
-            sync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this.Root);
-        } else {
-            sync.execute(this.Root);
+        try {
+            MyAsyncTask sync = new MyAsyncTask();
+            if(Build.VERSION.SDK_INT >= 11/*HONEYCOMB*/) {
+                sync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this.Root);
+            } else {
+                sync.execute(this.Root);
+            }
+        } catch (Exception e) {
+            throw new Exception("Erreur, serveur indisponible");
         }
+
     }
 
 

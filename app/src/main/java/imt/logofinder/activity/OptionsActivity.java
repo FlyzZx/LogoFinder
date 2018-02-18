@@ -10,6 +10,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -83,7 +84,11 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
 
 
         ServerTraining serverTraining = new ServerTraining(serverOptions.getServerPath(), this);
-        serverTraining.getRemoteFiles();
+        try {
+            serverTraining.getRemoteFiles();
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
