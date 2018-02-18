@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_takePic = null;
     private Button btn_choosePic = null;
     private Button btn_analyze = null;
+    private Button btn_options = null;
+
+
     private ImageView imageView_main = null;
 
     @Override
@@ -94,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Bouton analyse de l'image
         this.btn_analyze = (Button) findViewById(R.id.btn_analyze);
         this.btn_analyze.setOnClickListener(this);
+        //Bouton Options
+        this.btn_options = (Button) findViewById(R.id.btn_options);
+        this.btn_options.setOnClickListener(this);
+
 
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
@@ -138,6 +145,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+            case R.id.btn_options:
+                Intent optionsIntent = new Intent(this,OptionsActivity.class);
+                startActivity(optionsIntent);
                 break;
             default:
                 break;
