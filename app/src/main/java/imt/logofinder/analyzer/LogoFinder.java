@@ -128,7 +128,7 @@ public class LogoFinder {
     public void train() {
         this.indexJson = new JSONObject();
         try {
-            indexJson.put("vocabulaire", "vocab.yml");
+            indexJson.put("vocabulary", "vocab.yml");
         } catch (JSONException e) {
             e.printStackTrace();
         }
