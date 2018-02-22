@@ -155,8 +155,8 @@ public class ServerTraining {
             indexWriter.close();
 
             JSONObject jsonObject = new JSONObject(data);
-            if (jsonObject.has("vocabulaire")) {
-                this.Vocabulaire = jsonObject.getString("vocabulaire");
+            if (jsonObject.has("vocabulary")) {
+                this.Vocabulaire = jsonObject.getString("vocabulary");
             }
             if (jsonObject.has("brands")) {
                 JSONArray jsonArray = jsonObject.getJSONArray("brands");
