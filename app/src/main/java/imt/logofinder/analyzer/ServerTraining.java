@@ -50,10 +50,8 @@ public class ServerTraining {
             //txtStatusDl = pendingDownloadDialog.getTextViewStatus();
             publishProgress("Vérification de l'index...");
             if (isDownloadNeeded()) {
+                deleteRecursive(new File(Environment.getExternalStorageDirectory() + "/LogoFinder"));
                 Log.d(TAG, "Téléchargement des fichiers...");
-                File logoFinderDir = new File(Environment.getExternalStorageDirectory(), "/LogoFinder");
-                if (logoFinderDir.exists())
-                    logoFinderDir.delete();//Si le dossier existe on le supprime pour éviter les conflits entre classifiers de train différents.
                 publishProgress("Téléchargement de l'index...");
                 remoteIndex();
                 publishProgress("Téléchargement du vocabulaire...");
@@ -103,6 +101,14 @@ public class ServerTraining {
             throw new Exception("Erreur, serveur indisponible");
         }
 
+    }
+
+    private void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
 
