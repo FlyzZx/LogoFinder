@@ -28,7 +28,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <ProgressBar
-        android:id="@+id/progressBar"
+        android:id="@+id/progressBar_pending"
         style="@style/progressImt"
         android:layout_width="0dp"
         android:layout_height="0dp"

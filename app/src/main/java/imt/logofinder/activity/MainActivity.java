@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -61,6 +63,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private ImageView imageView_main = null;
+    private PendingDownloadDialog pendingDialog = null;
+    private TextView txtStatus = null;
+
+    //ASYNCTASK FOR PREDICTION
+    private class PredictASync extends AsyncTask<String, String, String>  {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            //txtStatusDl = pendingDownloadDialog.getTextViewStatus();
+            publishProgress("Traitement en cours");
+            try {
+                LogoFinder logoFinder = new LogoFinder();
+                logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
+                logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
+                String outPath = logoFinder.predict(MainActivity.this.tempPath);
+                MainActivity.this.outPath = outPath;
+                if (!MainActivity.this.outPath.equals("")) {
+                    return MainActivity.this.outPath;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return "Erreur de traitement";
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            if(txtStatus == null) {
+                txtStatus = pendingDialog.getTextViewStatus();
+            }
+            txtStatus.setText(values[0]);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pendingDialog = new PendingDownloadDialog();
+            pendingDialog.setCancelable(false);
+            pendingDialog.show(MainActivity.this.getFragmentManager(), "PREDICT");
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String ret) {
+            publishProgress(ret);
+            pendingDialog.setCancelable(true);
+            pendingDialog.getProgressBar().setVisibility(View.INVISIBLE);
+            //pendingDialog.dismiss();
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -160,20 +212,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
                 break;
             case R.id.btn_analyze:
-                try {
-                    LogoFinder logoFinder = new LogoFinder();
-                    logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
-                    logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
-                    String outPath = logoFinder.predict(this.tempPath);
-                    this.outPath = outPath;
-                    if (this.outPath.equals("")) {
-                        Toast.makeText(this, "Vocabulaire non detecté !", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, this.outPath, Toast.LENGTH_LONG).show();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                PredictASync predict = new PredictASync();
+                predict.execute();
                 break;
             default:
                 break;

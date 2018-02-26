@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import imt.logofinder.R;
@@ -18,6 +19,7 @@ import imt.logofinder.R;
 public class PendingDownloadDialog extends DialogFragment {
 
     private TextView textViewStatus = null;
+    private ProgressBar progressBar = null;
 
 
     @Override
@@ -27,6 +29,7 @@ public class PendingDownloadDialog extends DialogFragment {
         View layout = inflater.inflate(R.layout.layout_dialog_pending,null);
 
         textViewStatus = layout.findViewById(R.id.textView_frag_pending_status);
+        progressBar = layout.findViewById(R.id.progressBar_pending);
         textViewStatus.setText("Téléchargement...");
 
         builder.setView(layout);
@@ -39,5 +42,9 @@ public class PendingDownloadDialog extends DialogFragment {
 
     public TextView getTextViewStatus() {
         return textViewStatus;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
     }
 }
