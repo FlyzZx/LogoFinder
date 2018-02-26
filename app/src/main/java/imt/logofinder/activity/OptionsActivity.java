@@ -78,6 +78,7 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         ServerOptions serverOptions = (ServerOptions) parent.getItemAtPosition(pos);
+
         //Recupère le chemin du serveur selectionné
         SharedPreferences sp = getSharedPreferences("logo", MODE_PRIVATE);
         sp.edit().putString("choosenServer", serverOptions.getServerPath()).commit();
@@ -116,6 +117,9 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
 
     @Override
     public void onServerCreation(String servername, String serverpath) {
+        if(!serverpath.endsWith("/")) {
+            serverpath += "/";
+        }
         serverDao.open();
         serverDao.add(servername, serverpath, 1);
         serverDao.close();
