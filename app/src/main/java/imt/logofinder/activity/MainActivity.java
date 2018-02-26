@@ -12,6 +12,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -61,58 +62,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_analyze = null;
     private Button btn_options = null;
 
-
     private ImageView imageView_main = null;
     private PendingDownloadDialog pendingDialog = null;
     private TextView txtStatus = null;
-
-    //ASYNCTASK FOR PREDICTION
-    private class PredictASync extends AsyncTask<String, String, String>  {
-
-        @Override
-        protected String doInBackground(String... strings) {
-            //txtStatusDl = pendingDownloadDialog.getTextViewStatus();
-            publishProgress("Traitement en cours");
-            try {
-                LogoFinder logoFinder = new LogoFinder();
-                logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
-                logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
-                String outPath = logoFinder.predict(MainActivity.this.tempPath);
-                MainActivity.this.outPath = outPath;
-                if (!MainActivity.this.outPath.equals("")) {
-                    return MainActivity.this.outPath;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return "Erreur de traitement";
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            if(txtStatus == null) {
-                txtStatus = pendingDialog.getTextViewStatus();
-            }
-            txtStatus.setText(values[0]);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            pendingDialog = new PendingDownloadDialog();
-            pendingDialog.setCancelable(false);
-            pendingDialog.show(MainActivity.this.getFragmentManager(), "PREDICT");
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(String ret) {
-            publishProgress(ret);
-            pendingDialog.setCancelable(true);
-            pendingDialog.getProgressBar().setVisibility(View.INVISIBLE);
-            //pendingDialog.dismiss();
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -138,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.btn_options:
-                Intent optionsIntent = new Intent(this,OptionsActivity.class);
+                Intent optionsIntent = new Intent(this, OptionsActivity.class);
                 startActivity(optionsIntent);
                 break;
         }
@@ -174,14 +126,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.btn_analyze.setOnClickListener(this);
 
 
-
         //ImageView Main
         this.imageView_main = (ImageView) findViewById(R.id.imageView_main);
 
         //Récupération du vocabulaire
         SharedPreferences sp = getSharedPreferences("logo", MODE_PRIVATE);
         String srv = sp.getString("choosenServer", "");
-        if(!srv.equals("")) {
+        if (!srv.equals("")) {
             this.servertest = new ServerTraining(srv, this);
             try {
                 this.servertest.getRemoteFiles();
@@ -212,12 +163,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
                 break;
             case R.id.btn_analyze:
-                PredictASync predict = new PredictASync();
-                predict.execute();
+                Thread predictTh = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            LogoFinder logoFinder = new LogoFinder();
+                            logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
+                            logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
+                            MainActivity.this.outPath = logoFinder.predict(MainActivity.this.tempPath);
+                            if (!outPath.equals("")) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        MainActivity.this.onReturnPredict(MainActivity.this.outPath);
+                                    }
+                                });
+
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+
+                predictTh.start();
                 break;
             default:
                 break;
         }
+    }
+
+    private void onReturnPredict(String ret) {
+        Toast.makeText(this, outPath, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -234,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         String name = "tmp.jpg";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = new File(storageDir +"/"+ name);
+        File image = new File(storageDir + "/" + name);
         this.tempPath = image.getAbsolutePath();
         return image;
     }
@@ -343,9 +320,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     retour = this.image;
             }
 
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }finally{
+        } finally {
             return retour;
         }
 
