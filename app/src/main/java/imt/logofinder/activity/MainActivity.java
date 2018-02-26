@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_choosePic:
                 // eraseFileTemp();
                 imageFromGallery();
+                break;
             case R.id.btn_analyze:
                 try {
                     LogoFinder logoFinder = new LogoFinder();
@@ -191,9 +192,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             File toDel = new File(this.tempPath);
             toDel.delete();
         }
-        String name = "tmp";
+        String name = "tmp.jpg";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(name, ".jpg", storageDir);
+        File image = new File(storageDir +"/"+ name);
         this.tempPath = image.getAbsolutePath();
         return image;
     }
@@ -277,32 +278,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public Bitmap findGoodImageOrientation() {
         ExifInterface ei = null;
+        Bitmap retour = this.image;
         try {
             ei = new ExifInterface(this.tempPath);
-        } catch (IOException e) {
+
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    retour = rotateImage(this.image, 90);
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    retour = rotateImage(this.image, 180);
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    retour = rotateImage(this.image, 270);
+                    break;
+
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    retour = this.image;
+            }
+
+        }catch(IOException e){
             e.printStackTrace();
+        }finally{
+            return retour;
         }
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-
-        Bitmap retour = null;
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                retour = rotateImage(this.image, 90);
-                break;
-
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                retour = rotateImage(this.image, 180);
-                break;
-
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                retour = rotateImage(this.image, 270);
-                break;
-
-            case ExifInterface.ORIENTATION_NORMAL:
-            default:
-                retour = this.image;
-        }
-        return retour;
 
     }
 
@@ -320,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             File dir = new File(outputPath);
             if (!dir.exists()) {
-                dir.mkdirs();
+                dir.createNewFile();
             }
 
 
