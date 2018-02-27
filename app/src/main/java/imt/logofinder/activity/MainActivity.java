@@ -192,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         MainActivity.this.onReturnPredict(MainActivity.this.outPath);
                                     }
                                 });
-
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
