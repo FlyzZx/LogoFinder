@@ -207,7 +207,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onReturnPredict(String ret) {
-        Toast.makeText(this, outPath, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, outPath, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this,ResultActivity.class);
+        Bundle extras = new Bundle();
+        extras.putString("EXTRA_CLASSE",ret);
+        extras.putString("EXTRA_TEMPATH",this.tempPath);
+        intent.putExtras(extras);
+        startActivity(intent);
+
     }
 
 
