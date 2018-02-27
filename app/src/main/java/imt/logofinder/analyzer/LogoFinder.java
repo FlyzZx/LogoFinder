@@ -290,8 +290,7 @@ public class LogoFinder {
             float minF = Float.MAX_VALUE;
             String bestMatch = null;
             for (String classP : classPath) {
-                SVM svm = SVM.create();
-                svm = SVM.load(classP);
+                SVM svm = SVM.load(classP);
                 Mat retM = new Mat();
                 float ret = svm.predict(histo, retM, 1);
 

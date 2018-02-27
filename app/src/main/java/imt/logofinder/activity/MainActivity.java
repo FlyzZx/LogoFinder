@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getkeepsafe.relinker.ReLinker;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -102,6 +104,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ReLinker.Logger logger = new ReLinker.Logger() {
+            @Override
+            public void log(String message) {
+                Log.v("HODOR", "(hold the door) " + message);
+            }
+        };
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_core");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_core");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgcodecs");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgcodecs");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgproc");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgproc");
         /*
          * PERMISSIONS
          */
