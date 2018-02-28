@@ -2,8 +2,11 @@ package imt.logofinder.services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,6 +16,8 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
+
+import imt.logofinder.activity.MainActivity;
 
 /**
  * Created by Tom on 28/02/2018.
@@ -62,11 +67,19 @@ public class SocketService extends Service {
     private Emitter.Listener onNewData = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            PendingIntent contentIntent =
+                    PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+            Uri uriSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Notification notif = new Notification.Builder(getApplicationContext())
                     .setContentTitle("LogoFinder")
                     .setContentText("Une nouvelle version est disponible sur le serveur")
                     .setSmallIcon(android.R.mipmap.sym_def_app_icon)
                     .setVibrate(new long[]{0, 100, 20, 100})
+                    .setContentIntent(contentIntent)
+                    .setAutoCancel(true)
+                    .setSound(uriSound)
                     .build();
             NotificationManager notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (notifManager != null) {

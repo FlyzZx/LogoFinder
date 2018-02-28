@@ -48,7 +48,7 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         serverDao = new ServerDao(getApplicationContext());
         serverDao.open();
         if(serverDao.selectAll().size() == 0) {
-            serverDao.add("Perso", "http://imtimagemobile.000webhostapp.com/", 1);
+            serverDao.add("Perso", "http://flyzzxnfr.tk/", 1);
         }
         serverDao.close();
 
