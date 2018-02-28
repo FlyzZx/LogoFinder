@@ -43,6 +43,7 @@
             android:name=".activity.OptionsActivity"
             android:parentActivityName=".activity.MainActivity" />
         <activity android:name=".activity.ResultActivity"></activity>
+        <service android:name=".services.SocketService" android:process=":logo_socket"></service>
     </application>
 
 </manifest>

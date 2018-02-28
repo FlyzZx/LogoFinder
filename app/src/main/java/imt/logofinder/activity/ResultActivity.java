@@ -48,6 +48,7 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         int id  = view.getId();
         switch (id){
             case R.id.btn_good:
+                this.finish();
                 break;
             case R.id.btn_bad:
                 break;

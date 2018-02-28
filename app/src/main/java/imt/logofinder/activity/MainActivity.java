@@ -2,6 +2,8 @@ package imt.logofinder.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,8 +13,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -46,6 +46,7 @@ import imt.logofinder.R;
 import imt.logofinder.analyzer.LogoFinder;
 import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.fragment.PendingDownloadDialog;
+import imt.logofinder.services.SocketService;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -154,7 +155,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+
+
+        //Start Service
+        if (!isMyServiceRunning(SocketService.class)) {
+            Intent intent = new Intent(this, SocketService.class);
+            startService(intent);
+        }
+
+
     }
+
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -208,10 +230,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void onReturnPredict(String ret) {
         //Toast.makeText(this, outPath, Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this,ResultActivity.class);
+        Intent intent = new Intent(this, ResultActivity.class);
         Bundle extras = new Bundle();
-        extras.putString("EXTRA_CLASSE",ret);
-        extras.putString("EXTRA_TEMPATH",this.tempPath);
+        extras.putString("EXTRA_CLASSE", ret);
+        extras.putString("EXTRA_TEMPATH", this.tempPath);
         intent.putExtras(extras);
         startActivity(intent);
 
