@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getkeepsafe.relinker.ReLinker;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -124,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET}, RETURN_PERM);
         }
+
+        FirebaseMessaging.getInstance().subscribeToTopic("database");
 
         /*
         Initialisation des composants
