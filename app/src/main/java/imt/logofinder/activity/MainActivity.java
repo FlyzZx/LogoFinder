@@ -46,7 +46,6 @@ import imt.logofinder.R;
 import imt.logofinder.analyzer.LogoFinder;
 import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.fragment.PendingDownloadDialog;
-import imt.logofinder.services.SocketService;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -155,15 +154,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
-
-
-        //Start Service
-        if (!isMyServiceRunning(SocketService.class)) {
-            Intent intent = new Intent(this, SocketService.class);
-            startService(intent);
-        }
-
-
     }
 
 

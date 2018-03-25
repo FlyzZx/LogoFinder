@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "27081079827",
+    "firebase_url": "https://logofinder-e6de6.firebaseio.com",
+    "project_id": "logofinder-e6de6",
+    "storage_bucket": "logofinder-e6de6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27081079827:android:981acf803bd92d05",
+        "android_client_info": {
+          "package_name": "imt.logofinder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27081079827-pd6so8o11dv9fpltqh4a6mrntk8q1ivi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCjQQJclBU0_szataWMXXrLV0L4azSFTo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

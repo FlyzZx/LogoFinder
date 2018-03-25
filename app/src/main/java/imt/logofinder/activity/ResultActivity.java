@@ -31,6 +31,9 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         btn_good = findViewById(R.id.btn_good);
         btn_bad = findViewById(R.id.btn_bad);
 
+        btn_good.setOnClickListener(this);
+        btn_bad.setOnClickListener(this);
+
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
