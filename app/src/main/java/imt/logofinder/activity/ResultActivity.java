@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import imt.logofinder.R;
+import imt.logofinder.fragment.AddServerDialogFragment;
+import imt.logofinder.fragment.AddTrainDialog;
 
 public class ResultActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView textView_title = null;
@@ -54,6 +56,11 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
                 this.finish();
                 break;
             case R.id.btn_bad:
+                //TODO APPEL SERVICE WEB
+                //Affichage d'un dialog
+                AddTrainDialog fragment = new AddTrainDialog();
+                fragment.show(this.getFragmentManager(), "addServer");
+                //fragment.setCreateServerListener(this);
                 break;
             default:
                 break;

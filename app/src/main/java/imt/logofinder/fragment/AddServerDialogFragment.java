@@ -23,7 +23,6 @@ public class AddServerDialogFragment extends DialogFragment{
     EditText serverPath = null;
     Button btnConfirm = null;
 
-
     CreateServerListener createServerListener = null;
 
     public interface CreateServerListener{
