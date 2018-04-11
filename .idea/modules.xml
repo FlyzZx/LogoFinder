@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/LogoFinder.iml" filepath="$PROJECT_DIR$/LogoFinder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Logofinder.iml" filepath="$PROJECT_DIR$/Logofinder.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

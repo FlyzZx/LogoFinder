@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ReLinker.Logger logger = new ReLinker.Logger() {
+        /*ReLinker.Logger logger = new ReLinker.Logger() {
             @Override
             public void log(String message) {
                 Log.v("HODOR", "(hold the door) " + message);
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgcodecs");
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgcodecs");
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgproc");
-        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgproc");
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgproc");*/
         /*
          * PERMISSIONS
          */
@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
+
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
@@ -192,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
                 break;
             case R.id.btn_analyze:
+                if(image.getWidth() > 1500 || image.getHeight() > 1500) this.resizeImageFile(new File(tempPath), 0.3f);
                 Thread predictTh = new Thread() {
                     @Override
                     public void run() {
@@ -309,6 +311,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         }
+    }
+
+    private void resizeImageFile(File path, float ratio) {
+        Bitmap tmp = BitmapFactory.decodeFile(path.getAbsolutePath());
+        Bitmap out = Bitmap.createScaledBitmap(tmp, (int)(tmp.getWidth() * ratio), (int)(tmp.getHeight() * ratio), false);
+        FileOutputStream fOut;
+        try {
+            fOut = new FileOutputStream(path);
+            out.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+            fOut.flush();
+            fOut.close();
+            tmp.recycle();
+            out.recycle();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void eraseFileTemp() {

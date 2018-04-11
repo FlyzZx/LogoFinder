@@ -20,7 +20,9 @@ import imt.logofinder.R;
 import imt.logofinder.analyzer.ServerTraining;
 import imt.logofinder.fragment.AddServerDialogFragment;
 import imt.logofinder.fragment.PendingDownloadDialog;
+import imt.logofinder.http.CustomRequest;
 import imt.logofinder.sql.dao.ServerDao;
+
 
 /**
  * Created by TOM on 15/02/2018.
@@ -31,6 +33,7 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
     private Spinner spinner_ddl_servers = null;
 
     private Button btn_add_server = null;
+    private Button btn_options = null;
     ServerDao serverDao = null;
 
     @Override
@@ -42,6 +45,7 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         this.textView_chemin_serveur = (TextView) findViewById(R.id.textView_chemin_serveur);
         this.spinner_ddl_servers = (Spinner) findViewById(R.id.spinner_ddl_servers);
         this.btn_add_server = (Button) findViewById(R.id.btn_add_server);
+        this.btn_options = (Button) findViewById(R.id.options_btn_startTraining);
 
         //Instanciation du helper SQLite pour la DAL
 
@@ -61,6 +65,14 @@ public class OptionsActivity extends AppCompatActivity implements OnItemSelected
         //Listeners
         this.spinner_ddl_servers.setOnItemSelectedListener(this);
         this.btn_add_server.setOnClickListener(this);
+        this.btn_options.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CustomRequest request = new CustomRequest();
+                request.execute(ResultActivity.serverAddress, "8080", ResultActivity.pathStartTraining);
+                Toast.makeText(OptionsActivity.this, "Démarrage du train...", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         fillDropDownList();
 

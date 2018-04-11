@@ -72,4 +72,15 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.28" />
 
+    <Button
+        android:id="@+id/options_btn_startTraining"
+        style="@style/ButtonAppImt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Lancer un train !"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_server" />
+
 </android.support.constraint.ConstraintLayout>

@@ -276,7 +276,10 @@ public class LogoFinder {
             //Pr�diction
             System.out.println("Predicting file " + filePath);
             Mat testImg = opencv_imgcodecs.imread(filePath, opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-            opencv_imgproc.resize(testImg, testImg, new opencv_core.Size(500, 700));
+            if(testImg.size().width() > 1500 || testImg.size().height() > 1500) {
+                opencv_imgproc.resize(testImg, testImg, new opencv_core.Size((int)(testImg.size().width() * 0.3f), (int)(testImg.size().height() * 0.3f)));
+            }
+
             Mat descriptor = new Mat();
             KeyPointVector keypoints = new KeyPointVector();
 
