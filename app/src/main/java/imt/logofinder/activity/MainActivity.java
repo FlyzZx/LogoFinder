@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*ReLinker.Logger logger = new ReLinker.Logger() {
+        ReLinker.Logger logger = new ReLinker.Logger() {
             @Override
             public void log(String message) {
                 Log.v("HODOR", "(hold the door) " + message);
@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgcodecs");
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgcodecs");
         ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "jniopencv_imgproc");
-        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgproc");*/
+        ReLinker.log(logger).recursively().loadLibrary(this.getBaseContext(), "opencv_imgproc");
+        //libdl
         /*
          * PERMISSIONS
          */
@@ -193,30 +194,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imageFromGallery();
                 break;
             case R.id.btn_analyze:
-                if(image.getWidth() > 1500 || image.getHeight() > 1500) this.resizeImageFile(new File(tempPath), 0.3f);
-                Thread predictTh = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            LogoFinder logoFinder = new LogoFinder();
-                            logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
-                            logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
-                            MainActivity.this.outPath = logoFinder.predict(MainActivity.this.tempPath);
-                            if (!outPath.equals("")) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        MainActivity.this.onReturnPredict(MainActivity.this.outPath);
-                                    }
-                                });
+                if(image != null) {
+                    if(image.getWidth() > 1500 || image.getHeight() > 1500) this.resizeImageFile(new File(tempPath), 0.3f);
+                    Thread predictTh = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                LogoFinder logoFinder = new LogoFinder();
+                                logoFinder.setVocabularyDir(Environment.getExternalStorageDirectory() + "/LogoFinder");
+                                logoFinder.setClassifierDir((Environment.getExternalStorageDirectory() + "/LogoFinder/Classifiers"));
+                                MainActivity.this.outPath = logoFinder.predict(MainActivity.this.tempPath);
+                                if (!outPath.equals("")) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            MainActivity.this.onReturnPredict(MainActivity.this.outPath);
+                                        }
+                                    });
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-                    }
-                };
+                    };
 
-                predictTh.start();
+                    predictTh.start();
+                } else {
+                    Toast.makeText(this, "Veuillez choisir ou prendre une image", Toast.LENGTH_SHORT).show();
+                }
                 break;
             default:
                 break;
